@@ -69,13 +69,13 @@ public final class Peer extends Thread {
             while (true) {
                 ds.setSoTimeout(2000);
                 try {
-                    receiveData = new byte[1024];
+                    receiveData = new byte[10240];
                     DatagramPacket dp = new DatagramPacket(receiveData, receiveData.length);
 
                     ds.receive(dp); // after this, receiveData is populated
 
-                    Console.log("Packet received!");
                     Object received = Serializer.deserialize(receiveData);
+                    Console.log("Packet received!");
 
                     /* Receive a request for sending something */
                     if (received instanceof Request) {

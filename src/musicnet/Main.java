@@ -26,9 +26,9 @@ public class Main extends Application {
     public static void main(String[] args) throws UnknownHostException {
         Peer p = new Peer(new PeerInfo("A", new Address("127.0.0.1", 2015)));
 //        for(int i = 0; i < 10; ++i) {
-            Request req = new Request();
-            req.params = new String[]{"192.168.0.102", "2015"};
-            p.sendRequest(req);
+//            Request req = new Request();
+//            req.params = new String[]{"192.168.0.102", "2015"};
+//            p.sendRequest(req);
 //        }
     }
 }
