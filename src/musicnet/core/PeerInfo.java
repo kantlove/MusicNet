@@ -1,5 +1,7 @@
 package musicnet.core;
 
+import java.net.UnknownHostException;
+
 /**
  * Created by mt on 12/2/2015.
  */
@@ -12,7 +14,7 @@ public class PeerInfo {
         this.address = address;
     }
 
-    public static PeerInfo fromString(String s) {
+    public static PeerInfo fromString(String s) throws UnknownHostException {
         assert s != null : "Invalid string";
 
         String[] parts = s.split(" ");
