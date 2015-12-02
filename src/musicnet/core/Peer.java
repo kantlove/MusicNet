@@ -59,7 +59,7 @@ public final class Peer extends Thread {
         System.out.printf("Listening on %s\n", this.info.address);
         try
         {
-            DatagramSocket ds = new DatagramSocket(this.info.address.port, this.info.address.ip);
+            DatagramSocket ds = new DatagramSocket(this.info.address.port);
 
             byte[] receiveData;
             int off = 0;
