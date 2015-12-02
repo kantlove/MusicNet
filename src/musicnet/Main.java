@@ -1,12 +1,17 @@
 package musicnet;
 
+
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import musicnet.core.Address;
+import musicnet.core.Peer;
+import musicnet.core.PeerInfo;
 import musicnet.util.FXMLLoaderEx;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 
 public class Main extends Application {
     private Stage primaryStage;
@@ -29,7 +34,7 @@ public class Main extends Application {
         primaryStage.show();
     }
 
-    public static void main(String[] args) {
-        launch(args);
+    public static void main(String[] args) throws UnknownHostException {
+        Peer p = new Peer(new PeerInfo("A", new Address("127.0.0.1", 2015)));
     }
 }

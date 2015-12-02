@@ -56,6 +56,7 @@ public final class Peer extends Thread {
      * Listen forever
      */
     private void listen() {
+        System.out.printf("Listening on %s\n", this.info.address);
         try
         {
             DatagramSocket ds = new DatagramSocket(this.info.address.port, this.info.address.ip);
@@ -79,7 +80,7 @@ public final class Peer extends Thread {
                     off = off + dp.getLength();
                 }
                 catch (ClassNotFoundException | IOException e) {
-                    e.printStackTrace();
+                    // e.printStackTrace();
                     // ignore because we are looping forever
                 }
             }

@@ -42,4 +42,9 @@ public class Address {
     public int hashCode() {
         return ip.hashCode() ^ Integer.hashCode(port);
     }
+
+    @Override
+    public String toString() {
+        return "" + ip + ":" + port;
+    }
 }
