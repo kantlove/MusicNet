@@ -1,11 +1,12 @@
 package musicnet.core;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
  * Created by mt on 12/2/2015.
  */
-public class DataChunk {
+public class DataChunk implements Serializable {
     public int sequence = 0; // sequence number
     public int total; // total number of chunks of this file
     public String id; // same id = same file

@@ -24,8 +24,8 @@ public class SendThread extends Thread {
         Address addr = new Address(request.params[0], Integer.valueOf(request.params[1]));
         DatagramSocket ds = new DatagramSocket();
 
-        String path = "C:\\Users\\mt\\Desktop\\proj 2\\code\\4_TransferFile";
-        File file = new File(path + "/send_files/song.mp3");
+        String path = "C:\\Users\\Minh Thai\\Desktop\\MusicNet\\data";
+        File file = new File(path + "/song.mp3");
 
         FileInputStream f = new FileInputStream(file);
         byte[] full = new byte[(int)file.length()], b, c;
@@ -42,7 +42,7 @@ public class SendThread extends Thread {
             remainLength = remainLength - chunkSize;
 
             DatagramPacket dp = new DatagramPacket(c, c.length, addr.ip, addr.port);
-            System.out.println("Sending data to " + c.length + " bytes to server, port 4567");
+            System.out.println("Sending " + c.length + " bytes to server, port " + addr.port);
 
             ds.send(dp);
             sequence++;
@@ -54,7 +54,7 @@ public class SendThread extends Thread {
             System.out.println("The number of bytes will be read: " + remainLength);
 
             DatagramPacket dp = new DatagramPacket(c, c.length, addr.ip, addr.port);
-            System.out.println("Sending data to " + c.length + " bytes to server.");
+            System.out.println("Sending " + c.length + " bytes to server.");
             ds.send(dp);
         }
     }
