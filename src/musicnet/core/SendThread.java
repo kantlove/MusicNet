@@ -1,5 +1,8 @@
 package musicnet.core;
 
+import javax.xml.crypto.Data;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -12,36 +15,79 @@ import java.util.List;
  */
 public class SendThread extends Thread {
     private Request request;
+    private Peer parent;
 
-    public SendThread(Request request) {
+    public SendThread(Peer parent, Request request) {
+        this.parent = parent;
         this.request = request;
         start();
     }
 
-    public void send() throws IOException {
-        Address addr = new Address(request.params[0], Integer.valueOf(request.params[1]));
+    /**
+     * Base on request type, prepare the correct data that we need to send
+     */
+    private byte[] prepareData() throws IOException {
+        switch (request.type) {
+            case SendHosts:
+                return Serializer.serialize(parent.knownHost);
+            case GetHosts:
+            default:
+                return Serializer.serialize(request);
+        }
+    }
+
+    private DataChunk createChunk(int sequence, int chunkCount, String dataId, byte[] b) {
+        DataChunk chunk = new DataChunk(sequence, chunkCount, dataId, b);
+        switch (request.type) {
+            case SendHosts:
+                chunk.type = Datatype.Object;
+                break;
+            case GetHosts:
+                chunk.type = Datatype.Request;
+                break;
+        }
+        return chunk;
+    }
+
+    private void send() throws IOException {
+        for(PeerInfo p : request.receivers) {
+            send(p.address);
+        }
+    }
+
+    private void send(Address receiver) throws IOException {
         DatagramSocket ds = new DatagramSocket();
-        List<String> test = Arrays.asList("foo", "bar", "baz");
-        byte[] full = Serializer.serialize(test), b;
-        int remainLength = full.length, off = 0, chunkSize = 1024;
+
+        byte[] full = prepareData(), b, c;
+        String dataId = String.valueOf(Arrays.hashCode(full));
+
+        int fileLength = full.length;
+        int remainLength = fileLength, off = 0, chunkSize = 1024;
+        int sequence = 0, chunkCount = (int)Math.ceil(fileLength * 1.0 / chunkSize);
 
         while (remainLength >= chunkSize) {
             b = Arrays.copyOfRange(full, off, off + chunkSize);
+            DataChunk chunk = createChunk(sequence, chunkCount, dataId, b);
+            c = Serializer.serialize(chunk);
 
-            off = off + chunkSize;
-            remainLength = remainLength - chunkSize;
-
-            DatagramPacket dp = new DatagramPacket(b, b.length, addr.ip, addr.port);
-            System.out.println("Sending data to " + b.length + " bytes to server, port 4567");
+            DatagramPacket dp = new DatagramPacket(c, c.length, receiver.ip, receiver.port);
+            //Console.log("Sending " + c.length + " bytes to server, port " + receiver.port);
 
             ds.send(dp);
+            
+            sequence++;
+            off = off + chunkSize;
+            remainLength = remainLength - chunkSize;
         }
         if (remainLength > 0) {
-            b = Arrays.copyOfRange(full, off, off + chunkSize);
-            System.out.println("The number of bytes will be read: " + remainLength);
+            b = Arrays.copyOfRange(full, off, off + remainLength);
+            DataChunk chunk = createChunk(sequence, chunkCount, dataId, b);
+            c = Serializer.serialize(chunk);
 
-            DatagramPacket dp = new DatagramPacket(b, b.length, addr.ip, addr.port);
-            System.out.println("Sending data to " + b.length + " bytes to server.");
+            //Console.log("The number of bytes will be read: " + remainLength);
+            DatagramPacket dp = new DatagramPacket(c, c.length, receiver.ip, receiver.port);
+            //Console.log("Sending " + c.length + " bytes to server.");
+
             ds.send(dp);
         }
     }

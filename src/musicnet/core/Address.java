@@ -1,12 +1,13 @@
 package musicnet.core;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
  * Created by mt on 12/2/2015.
  */
-public class Address {
+public class Address implements Serializable {
     public InetAddress ip;
     public int port;
 
