@@ -6,6 +6,7 @@ import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,7 +54,8 @@ public final class Peer extends Thread {
     }
 
     public void sendRequest(Request req) {
-        new SendThread(req);
+        req.sender = this.info;
+        new SendThread(this, req);
     }
 
     /**
@@ -69,23 +71,15 @@ public final class Peer extends Thread {
             while (true) {
                 ds.setSoTimeout(2000);
                 try {
-                    receiveData = new byte[10240];
+                    receiveData = new byte[16384]; // the size must be always > any possible datachunk size
                     DatagramPacket dp = new DatagramPacket(receiveData, receiveData.length);
 
                     ds.receive(dp); // after this, receiveData is populated
 
                     Object received = Serializer.deserialize(receiveData);
-                    Console.log("Packet received!");
+                    //Console.log("Packet received!");
 
-                    /* Receive a request for sending something */
-                    if (received instanceof Request) {
-                        new SendThread((Request) received);
-                    }
-                    /* Receive a chunk of data from a file */
-                    else if (received instanceof DataChunk) {
-                        DataChunk data = (DataChunk)received;
-                        addReceivedChunk(data);
-                    }
+                    processReceivedPacket(received);
 
                     off = off + dp.getLength();
                 }
@@ -100,11 +94,61 @@ public final class Peer extends Thread {
         }
     }
 
-    private void addReceivedChunk(DataChunk chunk) {
+    private void processReceivedPacket(Object received) throws IOException, ClassNotFoundException {
+        DataChunk data = (DataChunk)received;
+        addReceivedChunk(data);
+    }
+
+    private void addReceivedChunk(DataChunk chunk) throws IOException, ClassNotFoundException {
         if(!receivedData.containsKey(chunk.id)) {
             receivedData.put(chunk.id, new ArrayList<>());
         }
-        Helper.insert(receivedData.get(chunk.id), chunk.data, chunk.sequence);
+
+        List<Byte[]> list = receivedData.get(chunk.id);
+        Helper.insert(list, chunk.data, chunk.sequence);
+
+        /* Check if a file is complete */
+        if(list.size() == chunk.total) {
+            byte[] whole = Helper.mergeChunks(list);
+            processCompleteFile(chunk.type, whole);
+        }
+    }
+
+    private void processCompleteFile(Datatype type, byte []data) throws IOException, ClassNotFoundException {
+        if(type == Datatype.Object) {
+            //Console.log("Received an Object");
+            List<PeerInfo> list = (List<PeerInfo>)Serializer.deserialize(data);
+            addNewHosts(list);
+        }
+        /* Receive a request for sending something */
+        else if (type == Datatype.Request) {
+            //Console.log("Received a Request");
+            Request request = (Request)Serializer.deserialize(data);
+
+            addNewHosts(Arrays.asList(request.sender)); // add if this is a stranger
+
+            request.type = RequestType.SendHosts;
+            request.receivers = Arrays.asList(request.sender);
+            sendRequest(request); // IMPORTANT! This line must be the last line
+        }
+    }
+
+    /**
+     * Get new hosts from a list and add them
+     * @param newHosts list contains some hosts
+     */
+    private void addNewHosts(List<PeerInfo> newHosts) {
+        String s = "";
+        for(PeerInfo p : newHosts) {
+            if(!knownHost.contains(p) && !this.info.equals(p)) {
+                knownHost.add(p);
+                s += " " + p.name;
+            }
+        }
+        if(s.length() > 0) {
+            Console.logf("%s: %s. ", this.info.name, Arrays.toString(knownHost.toArray()));
+            Console.log("Discover " + s);
+        }
     }
 
     @Override

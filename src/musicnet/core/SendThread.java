@@ -1,5 +1,6 @@
 package musicnet.core;
 
+import javax.xml.crypto.Data;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -14,47 +15,79 @@ import java.util.List;
  */
 public class SendThread extends Thread {
     private Request request;
+    private Peer parent;
 
-    public SendThread(Request request) {
+    public SendThread(Peer parent, Request request) {
+        this.parent = parent;
         this.request = request;
         start();
     }
 
-    public void send() throws IOException {
-        Address addr = new Address(request.params[0], Integer.valueOf(request.params[1]));
+    /**
+     * Base on request type, prepare the correct data that we need to send
+     */
+    private byte[] prepareData() throws IOException {
+        switch (request.type) {
+            case SendHosts:
+                return Serializer.serialize(parent.knownHost);
+            case GetHosts:
+            default:
+                return Serializer.serialize(request);
+        }
+    }
+
+    private DataChunk createChunk(int sequence, int chunkCount, String dataId, byte[] b) {
+        DataChunk chunk = new DataChunk(sequence, chunkCount, dataId, b);
+        switch (request.type) {
+            case SendHosts:
+                chunk.type = Datatype.Object;
+                break;
+            case GetHosts:
+                chunk.type = Datatype.Request;
+                break;
+        }
+        return chunk;
+    }
+
+    private void send() throws IOException {
+        for(PeerInfo p : request.receivers) {
+            send(p.address);
+        }
+    }
+
+    private void send(Address receiver) throws IOException {
         DatagramSocket ds = new DatagramSocket();
 
-        String path = "C:\\Users\\Minh Thai\\Desktop\\MusicNet\\data";
-        File file = new File(path + "/song.mp3");
+        byte[] full = prepareData(), b, c;
+        String dataId = String.valueOf(Arrays.hashCode(full));
 
-        FileInputStream f = new FileInputStream(file);
-        byte[] full = new byte[(int)file.length()], b, c;
-
-        int remainLength = full.length, off = 0, chunkSize = 1024;
-        int sequence = 0, chunkCount = (int)Math.ceil(full.length * 1.0 / chunkSize);
+        int fileLength = full.length;
+        int remainLength = fileLength, off = 0, chunkSize = 1024;
+        int sequence = 0, chunkCount = (int)Math.ceil(fileLength * 1.0 / chunkSize);
 
         while (remainLength >= chunkSize) {
             b = Arrays.copyOfRange(full, off, off + chunkSize);
-            DataChunk chunk = new DataChunk(sequence, chunkCount, String.valueOf(full.hashCode()), b);
+            DataChunk chunk = createChunk(sequence, chunkCount, dataId, b);
             c = Serializer.serialize(chunk);
 
-            off = off + chunkSize;
-            remainLength = remainLength - chunkSize;
-
-            DatagramPacket dp = new DatagramPacket(c, c.length, addr.ip, addr.port);
-            System.out.println("Sending " + c.length + " bytes to server, port " + addr.port);
+            DatagramPacket dp = new DatagramPacket(c, c.length, receiver.ip, receiver.port);
+            //Console.log("Sending " + c.length + " bytes to server, port " + receiver.port);
 
             ds.send(dp);
+            
             sequence++;
+            off = off + chunkSize;
+            remainLength = remainLength - chunkSize;
         }
         if (remainLength > 0) {
-            b = Arrays.copyOfRange(full, off, off + chunkSize);
-            DataChunk chunk = new DataChunk(sequence, String.valueOf(full.hashCode()), b);
+            b = Arrays.copyOfRange(full, off, off + remainLength);
+            DataChunk chunk = createChunk(sequence, chunkCount, dataId, b);
             c = Serializer.serialize(chunk);
-            System.out.println("The number of bytes will be read: " + remainLength);
 
-            DatagramPacket dp = new DatagramPacket(c, c.length, addr.ip, addr.port);
-            System.out.println("Sending " + c.length + " bytes to server.");
+            //Console.log("The number of bytes will be read: " + remainLength);
+            DatagramPacket dp = new DatagramPacket(c, c.length, receiver.ip, receiver.port);
+            //Console.log("Sending " + c.length + " bytes to server.");
+
             ds.send(dp);
         }
     }

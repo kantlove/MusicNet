@@ -31,4 +31,36 @@ public final class Helper {
         }
         return result;
     }
+
+    /**
+     * Convert a wrapper array to a primitive array
+     */
+    public static byte[] toPrimitive(Byte[] array) {
+        if (array == null) {
+            return null;
+        } else if (array.length == 0) {
+            return new byte[0];
+        }
+        final byte[] result = new byte[array.length];
+        for (int i = 0; i < array.length; i++) {
+            result[i] = array[i];
+        }
+        return result;
+    }
+
+    public static byte[] mergeChunks(List<Byte[]> chunks) {
+        int length = 0;
+        for (Byte[] c : chunks) {
+            length += c.length;
+        }
+        byte[] result = new byte[length];
+        int pos = 0;
+        for (Byte[] array : chunks) {
+            for (byte element : array) {
+                result[pos] = element;
+                pos++;
+            }
+        }
+        return result;
+    }
 }

@@ -4,7 +4,8 @@ package musicnet.core;
  * Created by mt on 12/2/2015.
  */
 public enum RequestType {
-    Discover,
+    GetHosts, // get the list of known hosts from other peer
+    SendHosts, //  send the list of known hosts to a peer
     Search,
-    Get // get file
+    GetFile // get file
 }
