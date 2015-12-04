@@ -1,14 +1,10 @@
 package musicnet.core;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -19,6 +15,8 @@ public final class Peer extends Thread {
     public PeerInfo info;
     public List<PeerInfo> knownHost = new CopyOnWriteArrayList<>();
     public Map<String, ArrayList<Byte[]>> receivedData = new ConcurrentHashMap<>();
+
+    public PeerEvent peerDiscovered = new PeerEvent();
 
     public Peer(PeerInfo info) {
         this.info = info;
@@ -32,6 +30,11 @@ public final class Peer extends Thread {
     public Peer(String nodeFile) throws IOException {
         knownHost.addAll(readNodes(nodeFile));
         start();
+    }
+
+    public void sendRequest(Request req) {
+        req.sender = this.info;
+        new SendThread(this, req);
     }
 
     private List<PeerInfo> readNodes(String path) throws IOException {
@@ -53,9 +56,19 @@ public final class Peer extends Thread {
         return rs;
     }
 
-    public void sendRequest(Request req) {
-        req.sender = this.info;
-        new SendThread(this, req);
+    /**
+     * Get the list of known hosts from other peers periodically
+     */
+    private void discover() {
+        int interval = 5000;
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                //Console.info("Discover request sent to " + Arrays.toString(knownHost.toArray()));
+                sendRequest(new Request(RequestType.GetHosts, knownHost));
+            }
+        }, interval, interval);
     }
 
     /**
@@ -138,21 +151,25 @@ public final class Peer extends Thread {
      * @param newHosts list contains some hosts
      */
     private void addNewHosts(List<PeerInfo> newHosts) {
-        String s = "";
+        List<PeerInfo> validHosts = new ArrayList<>(); // real new hosts
+
         for(PeerInfo p : newHosts) {
             if(!knownHost.contains(p) && !this.info.equals(p)) {
                 knownHost.add(p);
-                s += " " + p.name;
+
+                validHosts.add(p);
             }
         }
-        if(s.length() > 0) {
-            Console.logf("%s: %s. ", this.info.name, Arrays.toString(knownHost.toArray()));
-            Console.log("Discover " + s);
+        if(validHosts.size() > 0) {
+            //Console.logf("%s: %s. ", this.info.name, Arrays.toString(knownHost.toArray()));
+
+            peerDiscovered.invoke(this, validHosts);
         }
     }
 
     @Override
     public void run() {
-        listen();
+        discover();
+        listen(); // IMPORTANT! This must be called last!
     }
 }

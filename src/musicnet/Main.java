@@ -12,6 +12,7 @@ import musicnet.core.*;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -37,18 +38,14 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) throws IOException {
+        Main obj = new Main();
         //Peer p = new Peer(new PeerInfo("A", new Address("127.0.0.1", 2015)));
-        Peer p = new Peer("D:\\My Document\\Java projects\\MusicNet\\data\\nodesD.txt");
+        Peer p = new Peer("D:\\My Document\\Java projects\\MusicNet\\data\\nodesB.txt");
+        p.peerDiscovered.subscribe(Main::PeerDiscoveredHandler);
+    }
 
-        /* Get the list of known hosts from other peers periodically */
-        int interval = 5000;
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                Console.info("Discover request sent to " + Arrays.toString(p.knownHost.toArray()));
-                p.sendRequest(new Request(RequestType.GetHosts, p.knownHost));
-            }
-        }, interval, interval);
+    private static void PeerDiscoveredHandler(Object sender, Object arg) {
+        List<PeerInfo> newHosts = (List<PeerInfo>)arg;
+        Console.log("Discover " + Arrays.toString(newHosts.toArray()));
     }
 }
