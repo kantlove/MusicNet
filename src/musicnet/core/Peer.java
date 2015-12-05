@@ -1,12 +1,17 @@
 package musicnet.core;
 
+import javax.xml.crypto.Data;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Stream;
 
 /**
  * Created by mt on 12/2/2015.
@@ -14,14 +19,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public final class Peer extends Thread {
     public PeerInfo info;
     public List<PeerInfo> knownHost = new CopyOnWriteArrayList<>();
-    public Map<String, ArrayList<Byte[]>> receivedData = new ConcurrentHashMap<>();
+    public Map<String, ArrayList<DataChunk>> receivedData = new ConcurrentHashMap<>();
+    private List<File> filesList;
+    private String filesPath;
 
     public PeerEvent peerDiscovered = new PeerEvent();
-
-    public Peer(PeerInfo info) {
-        this.info = info;
-        start();
-    }
+    public PeerEvent fileReceived = new PeerEvent();
 
     /**
      * Init with nodes.txt
@@ -29,31 +32,41 @@ public final class Peer extends Thread {
      */
     public Peer(String nodeFile) throws IOException {
         knownHost.addAll(readNodes(nodeFile));
+        filesList = Helper.getFilesInDirectory(this.filesPath);
         start();
-    }
-
-    public void sendRequest(Request req) {
-        req.sender = this.info;
-        new SendThread(this, req);
     }
 
     private List<PeerInfo> readNodes(String path) throws IOException {
         final List<PeerInfo> rs = new ArrayList<>();
+        class Int {int val = 0;}
+        Int i = new Int();
+
         Files.lines(Paths.get(path)).forEach(s -> {
             PeerInfo info = null;
             try {
-                info = PeerInfo.fromString(s);
-                if (this.info == null)
-                    this.info = info;
+                if(i.val == 1) {
+                    filesPath = s;
+                }
                 else {
-                    rs.add(info);
+                    info = PeerInfo.fromString(s);
+                    if (i.val == 0)
+                        this.info = info;
+                    else {
+                        rs.add(info);
+                    }
                 }
             }
             catch (UnknownHostException e) {
                 e.printStackTrace();
             }
+            i.val++;
         });
         return rs;
+    }
+
+    public void sendRequest(Request req) {
+        req.sender = this.info;
+        new SendThread(this, req);
     }
 
     /**
@@ -80,24 +93,22 @@ public final class Peer extends Thread {
             DatagramSocket ds = new DatagramSocket(this.info.address.port);
 
             byte[] receiveData;
-            int off = 0;
             while (true) {
                 ds.setSoTimeout(2000);
                 try {
-                    receiveData = new byte[16384]; // the size must be always > any possible datachunk size
+                    receiveData = new byte[Config.RECEIVE_BASKET_SIZE]; // the size must be always > any possible datachunk size
                     DatagramPacket dp = new DatagramPacket(receiveData, receiveData.length);
 
                     ds.receive(dp); // after this, receiveData is populated
 
                     Object received = Serializer.deserialize(receiveData);
-                    //Console.log("Packet received!");
-
-                    processReceivedPacket(received);
-
-                    off = off + dp.getLength();
+                    new ReceiveThread(this, received);
                 }
                 catch (ClassNotFoundException | IOException e) {
                     // ignore because we are looping forever
+                    if(e instanceof SocketTimeoutException) {
+                        startResending();
+                    }
                 }
             }
         }
@@ -107,63 +118,12 @@ public final class Peer extends Thread {
         }
     }
 
-    private void processReceivedPacket(Object received) throws IOException, ClassNotFoundException {
-        DataChunk data = (DataChunk)received;
-        addReceivedChunk(data);
-    }
-
-    private void addReceivedChunk(DataChunk chunk) throws IOException, ClassNotFoundException {
-        if(!receivedData.containsKey(chunk.id)) {
-            receivedData.put(chunk.id, new ArrayList<>());
-        }
-
-        List<Byte[]> list = receivedData.get(chunk.id);
-        Helper.insert(list, chunk.data, chunk.sequence);
-
-        /* Check if a file is complete */
-        if(list.size() == chunk.total) {
-            byte[] whole = Helper.mergeChunks(list);
-            processCompleteFile(chunk.type, whole);
-        }
-    }
-
-    private void processCompleteFile(Datatype type, byte []data) throws IOException, ClassNotFoundException {
-        if(type == Datatype.Object) {
-            //Console.log("Received an Object");
-            List<PeerInfo> list = (List<PeerInfo>)Serializer.deserialize(data);
-            addNewHosts(list);
-        }
-        /* Receive a request for sending something */
-        else if (type == Datatype.Request) {
-            //Console.log("Received a Request");
-            Request request = (Request)Serializer.deserialize(data);
-
-            addNewHosts(Arrays.asList(request.sender)); // add if this is a stranger
-
-            request.type = RequestType.SendHosts;
-            request.receivers = Arrays.asList(request.sender);
-            sendRequest(request); // IMPORTANT! This line must be the last line
-        }
-    }
-
-    /**
-     * Get new hosts from a list and add them
-     * @param newHosts list contains some hosts
-     */
-    private void addNewHosts(List<PeerInfo> newHosts) {
-        List<PeerInfo> validHosts = new ArrayList<>(); // real new hosts
-
-        for(PeerInfo p : newHosts) {
-            if(!knownHost.contains(p) && !this.info.equals(p)) {
-                knownHost.add(p);
-
-                validHosts.add(p);
+    private void startResending() {
+        for(Map.Entry<String, ArrayList<DataChunk>> entry : receivedData.entrySet()) {
+            List<DataChunk> val = entry.getValue();
+            if(val.size() == 0 || val.get(0) == null || Helper.countNonNull(val) < val.get(0).total) {
+                Console.infof("A file is corrupted. Let the user click retry or resend request automatically?t.\n");
             }
-        }
-        if(validHosts.size() > 0) {
-            //Console.logf("%s: %s. ", this.info.name, Arrays.toString(knownHost.toArray()));
-
-            peerDiscovered.invoke(this, validHosts);
         }
     }
 

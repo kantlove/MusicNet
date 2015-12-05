@@ -2,6 +2,7 @@
   <dictionary name="mt">
     <words>
       <w>addr</w>
+      <w>datatype</w>
     </words>
   </dictionary>
 </component>

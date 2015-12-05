@@ -1,5 +1,8 @@
 package musicnet.core;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -48,19 +51,48 @@ public final class Helper {
         return result;
     }
 
-    public static byte[] mergeChunks(List<Byte[]> chunks) {
+    public static byte[] mergeChunks(List<DataChunk> chunks) {
         int length = 0;
-        for (Byte[] c : chunks) {
-            length += c.length;
+        for (DataChunk c : chunks) {
+            if(c == null) {
+                Console.log("Missing part " + chunks.indexOf(c));
+                continue; // packet loss or something, ignore
+            }
+            length += c.data.length;
         }
         byte[] result = new byte[length];
         int pos = 0;
-        for (Byte[] array : chunks) {
-            for (byte element : array) {
+        for (DataChunk c : chunks) {
+            if(c == null)
+                continue;
+            for (byte element : c.data) {
                 result[pos] = element;
                 pos++;
             }
         }
         return result;
+    }
+
+    public static <T>int countNonNull(Collection<T> list) {
+        int count = 0;
+        for(T e : list) {
+            count += (e != null) ? 1 : 0;
+        }
+        return count;
+    }
+
+    public static List<File> getFilesInDirectory(String directory) {
+        File folder = new File(directory);
+        File[] listOfFiles = folder.listFiles();
+        List<File> results = new ArrayList<>();
+
+        if (listOfFiles != null) {
+            for (int i = 0; i < listOfFiles.length; i++) {
+                if (listOfFiles[i].isFile()) {
+                    results.add(listOfFiles[i]);
+                }
+            }
+        }
+        return results;
     }
 }

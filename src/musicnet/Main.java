@@ -37,11 +37,22 @@ public class Main extends Application {
         primaryStage.show();
     }
 
+    static Peer peer;
+
     public static void main(String[] args) throws IOException {
-        Main obj = new Main();
         //Peer p = new Peer(new PeerInfo("A", new Address("127.0.0.1", 2015)));
-        Peer p = new Peer("D:\\My Document\\Java projects\\MusicNet\\data\\nodesB.txt");
-        p.peerDiscovered.subscribe(Main::PeerDiscoveredHandler);
+        peer = new Peer("D:\\My Document\\Java projects\\MusicNet\\data\\nodesA.txt");
+        peer.peerDiscovered.subscribe(Main::PeerDiscoveredHandler);
+
+        if(peer.info.name.equals("A")) {
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    peer.sendRequest(new Request(RequestType.GetFile, peer.knownHost, "song.mp3"));
+                }
+            }, 10000);
+        }
     }
 
     private static void PeerDiscoveredHandler(Object sender, Object arg) {
