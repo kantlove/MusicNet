@@ -13,10 +13,16 @@ import java.util.*;
 public class SendThread extends Thread {
     private Request request;
     private Peer parent;
+    private List<SearchResult> searchResults;
     private double percent, uploadedAmount;
     private Timer statusTimer = new Timer();
 
     public SendThread(Peer parent, Request request) {
+        this(parent, request, null);
+    }
+
+    public SendThread(Peer parent, Request request, List<SearchResult> searchResults) {
+        this.searchResults = searchResults;
         this.parent = parent;
         this.request = request;
         start();
@@ -37,6 +43,8 @@ public class SendThread extends Thread {
                 return b;
             case SendFilesList:
                 return Serializer.serialize(parent.filesList);
+            case SearchResult:
+                return Serializer.serialize(searchResults);
             default:
                 return Serializer.serialize(request);
         }
@@ -52,6 +60,7 @@ public class SendThread extends Thread {
         switch (request.type) {
             case SendHosts:
             case SendFilesList:
+            case SearchResult:
                 chunk.type = Datatype.Object;
                 break;
             case SendFile:
@@ -60,6 +69,7 @@ public class SendThread extends Thread {
             case GetHosts:
             case GetFile:
             case GetFilesList:
+            case Search:
                 chunk.type = Datatype.Request;
                 break;
         }

@@ -9,6 +9,7 @@ import musicnet.core.Peer;
 import musicnet.util.FXMLLoaderEx;
 import musicnet.core.*;
 
+import javax.naming.directory.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -46,6 +47,7 @@ public class Main extends Application {
         peer.peerDiscovered.subscribe(Main::PeerDiscoveredHandler);
         peer.fileReceived.subscribe(Main::FileReceivedHandler);
         peer.filesListReceived.subscribe(Main::FilesListReceivedHandler);
+        peer.searchResultsReceived.subscribe(Main::SearchResultsReceivedHandler);
 
         // a test sending request
         if(peer.info.name.equals("A")) {
@@ -54,7 +56,9 @@ public class Main extends Application {
                 @Override
                 public void run() {
                     //peer.sendRequest(new Request(RequestType.GetFile, peer.knownHost, "song.mp3"));
-                    peer.sendRequest(new Request(RequestType.GetFilesList, peer.knownHost));
+                    //peer.sendRequest(new Request(RequestType.GetFilesList, peer.knownHost));
+                    peer.sendRequest(new Request(RequestType.Search, peer.knownHost, "noo phuc thinh ngay mua tan"));
+                    peer.sendRequest(new Request(RequestType.Search, peer.knownHost, "two hearst"));
                 }
             }, 10000);
         }
@@ -72,6 +76,11 @@ public class Main extends Application {
     private static void FilesListReceivedHandler(Object sender, Object arg) {
         Console.info("Files list received");
         Console.info(Arrays.toString(((List<SongFile>)arg).toArray()));
+    }
+
+    private static void SearchResultsReceivedHandler(Object sender, Object arg) {
+        Console.info("Search results received");
+        Console.info(Arrays.toString(((List<SearchResult>)arg).toArray()));
     }
 
 }

@@ -4,14 +4,22 @@ import java.io.File;
 import java.io.Serializable;
 
 public class SongFile implements Serializable {
-    public String name;
-    public String hash;
+    public String name = "unknown";
+    public String hash = "nohash";
     private File file;
+
+    protected SongFile() {}
 
     public SongFile(File file) {
         this.file = file;
         name = file.getName();
         hash = "" + file.getPath().hashCode();
+    }
+
+    public SongFile(SongFile song) {
+        this.file = song.file;
+        this.name = song.name;
+        this.hash = song.hash;
     }
 
     @Override
@@ -36,5 +44,25 @@ public class SongFile implements Serializable {
     @Override
     public String toString() {
         return String.format("%s - %s", name, hash);
+    }
+}
+
+class SearchResult extends SongFile {
+    double score;
+
+    public SearchResult() {}
+
+    public SearchResult(File file) {
+        super(file);
+    }
+
+    public SearchResult(SongFile song, double score) {
+        super(song);
+        this.score = score;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + String.format(" (%.2f)", score);
     }
 }

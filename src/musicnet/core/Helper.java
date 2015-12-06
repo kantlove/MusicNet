@@ -2,9 +2,7 @@ package musicnet.core;
 
 import java.io.File;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by mt on 12/2/2015.
@@ -100,5 +98,30 @@ public final class Helper {
     public static Type getElementType(List<?> list) {
         assert list.size() > 0;
         return list.get(0).getClass();
+    }
+
+    /**
+     * Find a list of songs base on matching between query and song names
+     * @param query query that contains the name of the target song
+     * @param files list of available songs to search
+     * @param threshold songs that has matching result lower than threshold will be discarded
+     * @return
+     */
+    public static List<SearchResult> bulkMatch(String query, List<SongFile> files, double threshold) {
+        List<SearchResult> results = new ArrayList<>();
+        for(SongFile f : files) {
+            double score = DiceCoefficient.percentMatch(query, f.name);
+            if(score >= threshold) {
+                results.add(new SearchResult(f, score));
+            }
+        }
+
+        Collections.sort(results, new Comparator<SearchResult>() {
+            @Override
+            public int compare(SearchResult o1, SearchResult o2) {
+                return Double.compare(o2.score, o1.score);
+            }
+        });
+        return results;
     }
 }

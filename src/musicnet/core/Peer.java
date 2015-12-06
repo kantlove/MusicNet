@@ -20,6 +20,7 @@ public final class Peer extends Thread {
     public PeerEvent peerDiscovered = new PeerEvent();
     public PeerEvent fileReceived = new PeerEvent();
     public PeerEvent filesListReceived = new PeerEvent();
+    public PeerEvent searchResultsReceived = new PeerEvent();
 
     public PeerInfo info;
     public List<PeerInfo> knownHost = new CopyOnWriteArrayList<>();
@@ -69,6 +70,11 @@ public final class Peer extends Thread {
     public void sendRequest(Request req) {
         req.sender = this.info;
         new SendThread(this, req);
+    }
+
+    public void sendRequest(Request req, List<SearchResult> searchResults) {
+        req.sender = this.info;
+        new SendThread(this, req, searchResults);
     }
 
     /**
@@ -127,6 +133,10 @@ public final class Peer extends Thread {
                 Console.infof("A file is corrupted. Let the user click retry or resend request automatically?t.\n");
             }
         }
+    }
+
+    public List<SearchResult> search(String query) {
+        return Helper.bulkMatch(query, this.filesList, 0.3);
     }
 
     @Override

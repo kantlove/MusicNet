@@ -10,7 +10,7 @@ public class Request implements Serializable {
     public RequestType type;
     public PeerInfo sender;
     public List<PeerInfo> receivers;
-    public String[] params; // [0]: ip address, [1]: port, [2...]: custom params
+    public String[] params;
 
     public Request(RequestType type, List<PeerInfo> receivers, String...params) {
         assert receivers.size() > 0 : "At least 1 receiver";

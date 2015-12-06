@@ -7,6 +7,7 @@ public enum RequestType {
     GetHosts, // get the list of known hosts from other peer
     SendHosts, //  send the list of known hosts to a peer
     Search,
+    SearchResult,
     GetFilesList,
     SendFilesList,
     GetFile, // get file

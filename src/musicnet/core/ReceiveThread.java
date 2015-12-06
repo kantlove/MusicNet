@@ -3,6 +3,7 @@ package musicnet.core;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.annotation.ElementType;
 import java.lang.reflect.Type;
 import java.util.*;
 
@@ -41,7 +42,6 @@ public class ReceiveThread extends Thread {
 
     private void processCompleteFile(Datatype type, byte []data) throws IOException, ClassNotFoundException {
         if(type == Datatype.Object) {
-            //Console.log("Received an Object");
             List<?> list = (List<?>)Serializer.deserialize(data);
             if(list.size() > 0) {
                 Type elementType = Helper.getElementType(list);
@@ -51,14 +51,17 @@ public class ReceiveThread extends Thread {
                 else if(elementType == SongFile.class) {
                     parent.filesListReceived.invoke(parent, list);
                 }
+                else if(elementType == SearchResult.class) {
+                    parent.searchResultsReceived.invoke(parent, list);
+                }
             }
         }
         /* Receive a request for sending something */
         else if (type == Datatype.Request) {
             //Console.log("Received a Request");
             Request request = (Request)Serializer.deserialize(data);
-
             addNewHosts(Arrays.asList(request.sender)); // add if this is a stranger
+            List<SearchResult> searchResults = null;
 
             switch(request.type) {
                 case GetHosts:
@@ -72,9 +75,20 @@ public class ReceiveThread extends Thread {
                     request.type = RequestType.SendFilesList;
                     Console.info("Send files list request received.");
                     break;
+                case Search:
+                    request.type = RequestType.SearchResult;
+                    Console.info("Search request received.");
+                    assert request.params != null && request.params.length > 0 : "Invalid search parameters";
+                    searchResults = parent.search(request.params[0]);
+                    break;
             }
             request.receivers = Arrays.asList(request.sender);
-            parent.sendRequest(request); // IMPORTANT! This line must be the last line
+
+            // IMPORTANT! This line must be the last line.
+            if(searchResults == null)
+                parent.sendRequest(request);
+            else
+                parent.sendRequest(request, searchResults);
         }
         /* Receive a file */
         else if(type == Datatype.File) {
