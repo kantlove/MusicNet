@@ -9,8 +9,8 @@ import musicnet.core.Peer;
 import musicnet.util.FXMLLoaderEx;
 import musicnet.core.*;
 
+import java.io.File;
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
@@ -40,16 +40,21 @@ public class Main extends Application {
     static Peer peer;
 
     public static void main(String[] args) throws IOException {
-        //Peer p = new Peer(new PeerInfo("A", new Address("127.0.0.1", 2015)));
+        // initialize
         peer = new Peer("D:\\My Document\\Java projects\\MusicNet\\data\\nodesA.txt");
+        // setup event handlers
         peer.peerDiscovered.subscribe(Main::PeerDiscoveredHandler);
+        peer.fileReceived.subscribe(Main::FileReceivedHandler);
+        peer.filesListReceived.subscribe(Main::FilesListReceivedHandler);
 
+        // a test sending request
         if(peer.info.name.equals("A")) {
             Timer timer = new Timer();
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    peer.sendRequest(new Request(RequestType.GetFile, peer.knownHost, "song.mp3"));
+                    //peer.sendRequest(new Request(RequestType.GetFile, peer.knownHost, "song.mp3"));
+                    peer.sendRequest(new Request(RequestType.GetFilesList, peer.knownHost));
                 }
             }, 10000);
         }
@@ -59,4 +64,14 @@ public class Main extends Application {
         List<PeerInfo> newHosts = (List<PeerInfo>)arg;
         Console.log("Discover " + Arrays.toString(newHosts.toArray()));
     }
+
+    private static void FileReceivedHandler(Object sender, Object arg) {
+        Console.info("File received.");
+    }
+
+    private static void FilesListReceivedHandler(Object sender, Object arg) {
+        Console.info("Files list received");
+        Console.info(Arrays.toString(((List<SongFile>)arg).toArray()));
+    }
+
 }

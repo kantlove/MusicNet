@@ -3,6 +3,7 @@ package musicnet.core;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.*;
 
 /**
@@ -41,8 +42,16 @@ public class ReceiveThread extends Thread {
     private void processCompleteFile(Datatype type, byte []data) throws IOException, ClassNotFoundException {
         if(type == Datatype.Object) {
             //Console.log("Received an Object");
-            List<PeerInfo> list = (List<PeerInfo>)Serializer.deserialize(data);
-            addNewHosts(list);
+            List<?> list = (List<?>)Serializer.deserialize(data);
+            if(list.size() > 0) {
+                Type elementType = Helper.getElementType(list);
+                if(elementType == PeerInfo.class) {
+                    addNewHosts((List<PeerInfo>)list);
+                }
+                else if(elementType == SongFile.class) {
+                    parent.filesListReceived.invoke(parent, list);
+                }
+            }
         }
         /* Receive a request for sending something */
         else if (type == Datatype.Request) {
@@ -51,19 +60,24 @@ public class ReceiveThread extends Thread {
 
             addNewHosts(Arrays.asList(request.sender)); // add if this is a stranger
 
-            if(request.type == RequestType.GetHosts) {
-                request.type = RequestType.SendHosts;
-                //Console.info("Send hosts request received.");
-            }
-            else if(request.type == RequestType.GetFile) {
-                request.type = RequestType.SendFile;
-                Console.info("Send file request received.");
+            switch(request.type) {
+                case GetHosts:
+                    request.type = RequestType.SendHosts;
+                    break;
+                case GetFile:
+                    request.type = RequestType.SendFile;
+                    Console.info("Send file request received.");
+                    break;
+                case GetFilesList:
+                    request.type = RequestType.SendFilesList;
+                    Console.info("Send files list request received.");
+                    break;
             }
             request.receivers = Arrays.asList(request.sender);
             parent.sendRequest(request); // IMPORTANT! This line must be the last line
         }
+        /* Receive a file */
         else if(type == Datatype.File) {
-            Console.info("File received.");
             File file = new File("D:\\My Document\\Java projects\\MusicNet\\data_receive\\song.mp3");
             FileOutputStream fos = new FileOutputStream(file);
             fos.write(data);

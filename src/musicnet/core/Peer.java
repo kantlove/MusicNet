@@ -17,14 +17,16 @@ import java.util.stream.Stream;
  * Created by mt on 12/2/2015.
  */
 public final class Peer extends Thread {
+    public PeerEvent peerDiscovered = new PeerEvent();
+    public PeerEvent fileReceived = new PeerEvent();
+    public PeerEvent filesListReceived = new PeerEvent();
+
     public PeerInfo info;
     public List<PeerInfo> knownHost = new CopyOnWriteArrayList<>();
     public Map<String, ArrayList<DataChunk>> receivedData = new ConcurrentHashMap<>();
-    private List<File> filesList;
-    private String filesPath;
 
-    public PeerEvent peerDiscovered = new PeerEvent();
-    public PeerEvent fileReceived = new PeerEvent();
+    public List<SongFile> filesList;
+    private String filesPath;
 
     /**
      * Init with nodes.txt

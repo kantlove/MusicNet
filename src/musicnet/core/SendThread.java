@@ -35,7 +35,8 @@ public class SendThread extends Thread {
                 byte[] b = new byte[(int) file.length()];
                 f.read(b);
                 return b;
-            case GetHosts:
+            case SendFilesList:
+                return Serializer.serialize(parent.filesList);
             default:
                 return Serializer.serialize(request);
         }
@@ -50,6 +51,7 @@ public class SendThread extends Thread {
         DataChunk chunk = new DataChunk(sequence, chunkCount, dataId, b);
         switch (request.type) {
             case SendHosts:
+            case SendFilesList:
                 chunk.type = Datatype.Object;
                 break;
             case SendFile:
@@ -57,6 +59,7 @@ public class SendThread extends Thread {
                 break;
             case GetHosts:
             case GetFile:
+            case GetFilesList:
                 chunk.type = Datatype.Request;
                 break;
         }

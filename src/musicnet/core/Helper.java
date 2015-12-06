@@ -1,6 +1,7 @@
 package musicnet.core;
 
 import java.io.File;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -81,18 +82,23 @@ public final class Helper {
         return count;
     }
 
-    public static List<File> getFilesInDirectory(String directory) {
+    public static List<SongFile> getFilesInDirectory(String directory) {
         File folder = new File(directory);
         File[] listOfFiles = folder.listFiles();
-        List<File> results = new ArrayList<>();
+        List<SongFile> results = new ArrayList<>();
 
         if (listOfFiles != null) {
             for (int i = 0; i < listOfFiles.length; i++) {
                 if (listOfFiles[i].isFile()) {
-                    results.add(listOfFiles[i]);
+                    results.add(new SongFile(listOfFiles[i]));
                 }
             }
         }
         return results;
+    }
+
+    public static Type getElementType(List<?> list) {
+        assert list.size() > 0;
+        return list.get(0).getClass();
     }
 }
