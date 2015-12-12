@@ -94,13 +94,20 @@ public class WelcomeController extends BaseController {
 
     public void start(ActionEvent event) throws IOException {
         if (getClient().isReady()) {
-            getClient().savePeers();
-            getMain().showHomeView();
+            if (getClient().savePeers()) {
+                getMain().startApplication();
+            } else {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("MusicNet can't start");
+                alert.setHeaderText(null);
+                alert.setContentText("Can't access nodes.txt file!");
+                alert.show();
+            }
         } else {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("MusicNet can't start");
             alert.setHeaderText(null);
-            alert.setContentText("Please fill enough initial peers");
+            alert.setContentText("Please fill enough initial peers!");
             alert.show();
         }
     }

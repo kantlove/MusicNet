@@ -29,7 +29,7 @@ public class Client extends Thread {
 
     public File getDirectory() {
         if (directory == null) {
-            directory = new File("C:\\Users\\Quan\\Desktop\\Data");
+            directory = new File("C:\\Users\\Quan\\Desktop\\Data1");
         }
         return directory;
     }
@@ -65,15 +65,17 @@ public class Client extends Thread {
         }
     }
 
-    public void savePeers() {
+    public boolean savePeers() {
         File file = getNodesFile();
         try {
             PrintWriter writer = new PrintWriter(file);
             for (PeerInfo peer : peers)
                 writer.println(peer.getName() + " " + peer.getAddress());
             writer.close();
+            return true;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
