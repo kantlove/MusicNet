@@ -1,6 +1,7 @@
 package musicnet.core;
 
 import musicnet.model.PeerInfo;
+import musicnet.model.SongFile;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

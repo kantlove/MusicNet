@@ -60,7 +60,10 @@ public class WelcomeController extends BaseController {
     public void selectDirectory(ActionEvent event) {
         DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle("Select directory");
-        File directory = chooser.showDialog(getMain().getPrimaryStage());
+        chooser.setInitialDirectory(getClient().getDirectory().getAbsoluteFile());
+        File directory = chooser.showDialog(getMain().primaryStage);
+        if (directory == null) return;
+
         fieldDirectory.setText(directory.getAbsolutePath());
 
         getClient().setDirectory(directory);

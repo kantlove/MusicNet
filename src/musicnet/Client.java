@@ -3,6 +3,7 @@ package musicnet;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import musicnet.model.PeerInfo;
+import musicnet.model.SongFile;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,12 +13,14 @@ import java.util.Scanner;
 
 public class Client extends Thread {
     public final ObservableList<PeerInfo> peers;
+    public final ObservableList<SongFile> songs;
     private PeerInfo info;
     private File directory;
     private File nodesFile;
 
     public Client() {
         peers = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
+        songs = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
     }
 
     public boolean isReady() {
@@ -26,7 +29,7 @@ public class Client extends Thread {
 
     public File getDirectory() {
         if (directory == null) {
-            directory = new File("");
+            directory = new File("C:\\Users\\Quan\\Desktop\\Data");
         }
         return directory;
     }
@@ -74,13 +77,56 @@ public class Client extends Thread {
         }
     }
 
+    public void updateSongs() {
+        File[] files = getDirectory().listFiles((dir, name) -> {
+            return name.toLowerCase().endsWith(".mp3");
+        });
+        if (files == null) {
+            songs.clear();
+        } else {
+            SongFile[] newSongs = new SongFile[files.length];
+            boolean[] add = new boolean[files.length];
+            for (int i = 0; i < newSongs.length; ++i) {
+                newSongs[i] = new SongFile(files[i]);
+                add[i] = true;
+            }
+
+            for (int i = 0; i < songs.size(); ) {
+                SongFile song = songs.get(i);
+
+                boolean remove = true;
+                for (int j = 0; j < newSongs.length; ++j)
+                    if (song.equals(newSongs[j])) {
+                        add[j] = false;
+                        remove = false;
+                    }
+                if (remove) songs.remove(i);
+                else ++i;
+            }
+
+            for (int i = 0; i < newSongs.length; ++i)
+                if (add[i]) songs.add(newSongs[i]);
+        }
+    }
+
     @Override
     public void run() {
         initialize();
+        discover();
+        listen(); // IMPORTANT! This must be called last!
     }
 
     private void initialize() {
         info = peers.get(0);
         peers.remove(0);
+        updateSongs();
+    }
+
+    private void discover() {
+
+    }
+
+    private void listen() {
+
     }
 }

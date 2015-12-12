@@ -1,5 +1,7 @@
 package musicnet.core;
 
+import musicnet.model.SongFile;
+
 import java.io.File;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -111,7 +113,7 @@ public final class Helper {
     public static List<SearchResult> bulkMatch(String query, List<SongFile> files, double threshold) {
         List<SearchResult> results = new ArrayList<>();
         for (SongFile f : files) {
-            double score = DiceCoefficient.percentMatch(query, f.name);
+            double score = DiceCoefficient.percentMatch(query, f.getName());
             if (score >= threshold) {
                 results.add(new SearchResult(f, score));
             }

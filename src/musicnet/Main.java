@@ -2,33 +2,20 @@ package musicnet;
 
 
 import javafx.application.Application;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import musicnet.core.Peer;
 import musicnet.util.FXMLLoaderEx;
-import musicnet.core.*;
 
-import javax.naming.directory.*;
-import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class Main extends Application {
-    private Stage primaryStage;
+    public Stage primaryStage;
+    public Client client;
     private BorderPane layoutRoot;
-    private Client client;
 
-    public Client getClient() {
-        return client;
-    }
-
-    public Stage getPrimaryStage() {
-        return primaryStage;
+    public static void main(String[] args) {
+        launch(args);
     }
 
     @Override
@@ -57,11 +44,9 @@ public class Main extends Application {
         loader.getController().setMain(this);
     }
 
-    public static void main(String[] args) {
-        launch(args);
-    }
-
     public void showHomeView() throws IOException {
+        client.start();
+
         FXMLLoaderEx loader = new FXMLLoaderEx();
         loader.setLocation(getClass().getResource("view/library.fxml"));
         layoutRoot.setCenter(loader.load());

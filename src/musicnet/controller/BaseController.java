@@ -15,6 +15,6 @@ public class BaseController {
     }
 
     public Client getClient() {
-        return getMain().getClient();
+        return getMain().client;
     }
 }
