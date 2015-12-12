@@ -2,18 +2,20 @@ package musicnet.model;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import musicnet.core.Helper;
 
 import java.io.File;
-import java.io.Serializable;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 
-public class SongFile implements Serializable {
+public class SongFile {
     private String name;
     private String hash;
     private BooleanProperty shared;
 
-    public SongFile(File file) {
+    public SongFile(File file) throws IOException, NoSuchAlgorithmException {
         name = file.getName();
-        hash = name;
+        hash = Helper.getFileCheckSum(file);
         shared = new SimpleBooleanProperty(true);
     }
 

@@ -1,5 +1,6 @@
 package musicnet.core;
 
+import musicnet.Client;
 import musicnet.model.Address;
 import musicnet.model.PeerInfo;
 
@@ -9,7 +10,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -17,20 +17,30 @@ import java.util.TimerTask;
  * Created by mt on 12/2/2015.
  */
 public class SendThread extends Thread {
+    private Client client;
     private Request request;
-    private Peer parent;
-    private List<SearchResult> searchResults;
+    private Object data;
+    private File file;
     private double percent, uploadedAmount;
     private Timer statusTimer = new Timer();
 
-    public SendThread(Peer parent, Request request) {
-        this(parent, request, null);
+    public SendThread(Client client, Request request) {
+        this.client = client;
+        this.request = request;
+        start();
     }
 
-    public SendThread(Peer parent, Request request, List<SearchResult> searchResults) {
-        this.searchResults = searchResults;
-        this.parent = parent;
+    public SendThread(Client client, Request request, Object data) {
+        this.client = client;
         this.request = request;
+        this.data = data;
+        start();
+    }
+
+    public SendThread(Client client, Request request, File file) {
+        this.client = client;
+        this.request = request;
+        this.file = file;
         start();
     }
 
@@ -40,17 +50,16 @@ public class SendThread extends Thread {
     private byte[] prepareData() throws IOException {
         switch (request.type) {
             case SendHosts:
-                return Serializer.serialize(parent.knownHost);
-            case SendFile:
-                File file = new File("D:\\My Document\\Java projects\\MusicNet\\data\\A\\song.mp3");
-                FileInputStream f = new FileInputStream(file);
-                byte[] b = new byte[(int) file.length()];
-                f.read(b);
-                return b;
             case SendFilesList:
-                return Serializer.serialize(parent.filesList);
             case SearchResult:
-                return Serializer.serialize(searchResults);
+                assert data != null;
+                return Serializer.serialize(data);
+            case SendFile:
+                assert file != null;
+                FileInputStream stream = new FileInputStream(file);
+                byte[] b = new byte[(int) file.length()];
+                stream.read(b);
+                return b;
             default:
                 return Serializer.serialize(request);
         }

@@ -7,7 +7,7 @@ import java.io.File;
 /**
  * Created by Quan on 12/12/2015.
  */
-class SearchResult {
+public class SearchResult {
     double score;
 
     public SearchResult() {

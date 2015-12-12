@@ -15,15 +15,6 @@ public class PeerInfo implements Serializable {
         setAddress(address);
     }
 
-    public static PeerInfo fromString(String s) {
-        assert s != null : "Invalid string";
-
-        String[] parts = s.split(" ");
-        assert parts.length > 2 : "Invalid string";
-
-        return new PeerInfo(parts[0], parts[1]);
-    }
-
     public String getName() {
         return name;
     }

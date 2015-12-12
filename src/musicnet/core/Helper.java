@@ -3,7 +3,11 @@ package musicnet.core;
 import musicnet.model.SongFile;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.lang.reflect.Type;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
@@ -82,21 +86,6 @@ public final class Helper {
         return count;
     }
 
-    public static List<SongFile> getFilesInDirectory(String directory) {
-        File folder = new File(directory);
-        File[] listOfFiles = folder.listFiles();
-        List<SongFile> results = new ArrayList<>();
-
-        if (listOfFiles != null) {
-            for (int i = 0; i < listOfFiles.length; i++) {
-                if (listOfFiles[i].isFile()) {
-                    results.add(new SongFile(listOfFiles[i]));
-                }
-            }
-        }
-        return results;
-    }
-
     public static Type getElementType(List<?> list) {
         assert list.size() > 0;
         return list.get(0).getClass();
@@ -126,5 +115,57 @@ public final class Helper {
             }
         });
         return results;
+    }
+
+    public static String getFileCheckSum(File file) throws IOException, NoSuchAlgorithmException {
+        // use MD5 algorithm
+        MessageDigest digest = MessageDigest.getInstance("MD5");
+
+        // get file input stream for reading the file content
+        FileInputStream stream = new FileInputStream(file);
+
+        // create byte array to read data in chunks
+        byte[] byteArray = new byte[1024];
+        int bytesCount;
+
+        // read file data and update in message digest
+        while ((bytesCount = stream.read(byteArray)) != -1) {
+            digest.update(byteArray, 0, bytesCount);
+        }
+
+        // close the stream; We don't need it now.
+        stream.close();
+
+        // get the hash's bytes
+        byte[] bytes = digest.digest();
+
+        // this bytes[] has bytes in decimal format;
+        // convert it to hexadecimal format
+        StringBuilder sb = new StringBuilder();
+        for (byte aByte : bytes) {
+            sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
+        }
+
+        // return complete hash
+        return sb.toString();
+    }
+
+    public static String getDataCheckSum(byte[] data) throws NoSuchAlgorithmException {
+        // use MD5 algorithm
+        MessageDigest digest = MessageDigest.getInstance("MD5");
+        digest.update(data);
+
+        // get the hash's bytes
+        byte[] bytes = digest.digest();
+
+        // this bytes[] has bytes in decimal format;
+        // convert it to hexadecimal format
+        StringBuilder sb = new StringBuilder();
+        for (byte aByte : bytes) {
+            sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
+        }
+
+        // return complete hash
+        return sb.toString();
     }
 }

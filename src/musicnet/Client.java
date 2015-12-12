@@ -2,18 +2,25 @@ package musicnet;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import musicnet.core.*;
+import musicnet.core.Console;
 import musicnet.model.PeerInfo;
 import musicnet.model.SongFile;
+import musicnet.model.SongInfo;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.PrintWriter;
-import java.util.Scanner;
+import java.io.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Client extends Thread {
     public final ObservableList<PeerInfo> peers;
     public final ObservableList<SongFile> songs;
+    public final ObservableList<SongInfo> infos;
+    public Map<String, List<DataChunk>> receivedData = new ConcurrentHashMap<>();
     private PeerInfo info;
     private File directory;
     private File nodesFile;
@@ -21,6 +28,7 @@ public class Client extends Thread {
     public Client() {
         peers = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
         songs = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
+        infos = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
     }
 
     public boolean isReady() {
@@ -90,8 +98,12 @@ public class Client extends Thread {
             boolean[] add = new boolean[files.length];
             for (int i = 0; i < newSongs.length; ++i)
                 if (files[i].isFile()) {
-                    newSongs[i] = new SongFile(files[i]);
-                    add[i] = true;
+                    try {
+                        newSongs[i] = new SongFile(files[i]);
+                        add[i] = true;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
 
             for (int i = 0; i < songs.size(); ) {
@@ -112,6 +124,57 @@ public class Client extends Thread {
         }
     }
 
+    public void sendRequest(Request req) {
+        req.sender = this.info;
+        new SendThread(this, req);
+    }
+
+    public void sendRequest(Request req, Object data) {
+        req.sender = this.info;
+        new SendThread(this, req, data);
+    }
+
+    public void sendRequest(Request req, File file) {
+        req.sender = this.info;
+        new SendThread(this, req, file);
+    }
+
+    public void updatePeers(List<PeerInfo> list) {
+
+    }
+
+    public void updateInfos(List<SongInfo> list) {
+
+    }
+
+    public void updateResult(List<SearchResult> list) {
+
+    }
+
+    public void fileReceived(File file) {
+
+    }
+
+    public List<SearchResult> search(String query) {
+        return null;
+    }
+
+    public void sendHosts(PeerInfo sender) {
+
+    }
+
+    public void sendFile(PeerInfo sender, String[] params) {
+
+    }
+
+    public void sendFilesList(PeerInfo sender) {
+
+    }
+
+    public void sendSearch(PeerInfo sender, String[] params) {
+        assert params != null && params.length > 0 : "Invalid search parameters";
+    }
+
     @Override
     public void run() {
         initialize();
@@ -126,10 +189,54 @@ public class Client extends Thread {
     }
 
     private void discover() {
-
+        int interval = 5000;
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                Console.info("Discover request sent to " + Arrays.toString(peers.toArray()));
+                sendRequest(new Request(RequestType.GetHosts, peers));
+            }
+        }, interval, interval);
     }
 
     private void listen() {
+        System.out.printf("Listening on %s\n", this.info.address);
+        try {
+            DatagramSocket ds = new DatagramSocket(this.info.address.port);
 
+            byte[] receiveData;
+            while (true) {
+                ds.setSoTimeout(2000);
+                try {
+                    receiveData = new byte[Config.RECEIVE_BASKET_SIZE]; // the size must be always > any possible datachunk size
+                    DatagramPacket dp = new DatagramPacket(receiveData, receiveData.length);
+
+                    ds.receive(dp); // after this, receiveData is populated
+
+                    Object received = Serializer.deserialize(receiveData);
+                    new ReceiveThread(this, received);
+                } catch (ClassNotFoundException | IOException e) {
+                    // ignore because we are looping forever
+                    if (e instanceof SocketTimeoutException) {
+                        startResending();
+                    }
+                }
+            }
+        } catch (SocketException ex) {
+            System.out.printf("UDP Port %d is occupied.\n", this.info.address.port);
+            System.exit(1);
+        }
     }
+
+    private void startResending() {
+        for (Map.Entry<String, List<DataChunk>> entry : receivedData.entrySet()) {
+            List<DataChunk> val = entry.getValue();
+            if (val.size() == 0 || val.get(0) == null || Helper.countNonNull(val) < val.get(0).total) {
+                Console.infof("A file is corrupted. Let the user click retry or resend request automatically?t.\n");
+            }
+        }
+    }
+
+
 }
