@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 public class WelcomeController extends BaseController {
-    public TableView tableNodes;
+    public TableView tablePeers;
     public TextField fieldDirectory;
     public TextField fieldName;
     public TextField fieldAddress;
@@ -25,7 +25,7 @@ public class WelcomeController extends BaseController {
         super.setMain(main);
         fieldDirectory.setText(getClient().getDirectory().getAbsolutePath());
         getClient().loadPeers();
-        tableNodes.setItems(getClient().peers);
+        tablePeers.setItems(getClient().peers);
     }
 
     @FXML
@@ -53,8 +53,8 @@ public class WelcomeController extends BaseController {
             }
         });
 
-        tableNodes.setEditable(true);
-        tableNodes.getColumns().addAll(nameCol, addrCol);
+        tablePeers.setEditable(true);
+        tablePeers.getColumns().addAll(nameCol, addrCol);
     }
 
     public void selectDirectory(ActionEvent event) {

@@ -10,7 +10,7 @@
                prefWidth="200.0"/>
     <Button layoutX="309.0" layoutY="38.0" mnemonicParsing="false" onAction="#selectDirectory" text="Select"/>
     <Label layoutX="58.0" layoutY="78.0" text="Nodes"/>
-    <TableView fx:id="tableNodes" layoutX="102.0" layoutY="78.0" prefHeight="240.0" prefWidth="200.0"/>
+    <TableView fx:id="tablePeers" layoutX="102.0" layoutY="78.0" prefHeight="240.0" prefWidth="200.0"/>
     <Button layoutX="309.0" layoutY="78.0" mnemonicParsing="false" onAction="#reset" prefWidth="48.0" text="Reset"/>
     <Button layoutX="309.0" layoutY="115.0" mnemonicParsing="false" onAction="#start" prefHeight="25.0"
             prefWidth="48.0" text="OK"/>

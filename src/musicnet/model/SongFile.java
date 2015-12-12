@@ -1,17 +1,20 @@
 package musicnet.model;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+
 import java.io.File;
 import java.io.Serializable;
 
 public class SongFile implements Serializable {
     private String name;
     private String hash;
-    private boolean shared;
+    private BooleanProperty shared;
 
     public SongFile(File file) {
         name = file.getName();
         hash = name;
-        shared = true;
+        shared = new SimpleBooleanProperty(true);
     }
 
     public String getName() {
@@ -30,12 +33,16 @@ public class SongFile implements Serializable {
         this.hash = hash;
     }
 
-    public boolean isShared() {
+    public BooleanProperty sharedProperty() {
         return shared;
     }
 
+    public boolean getShared() {
+        return shared.get();
+    }
+
     public void setShared(boolean shared) {
-        this.shared = shared;
+        this.shared.set(shared);
     }
 
     @Override

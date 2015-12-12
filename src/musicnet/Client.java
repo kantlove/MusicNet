@@ -86,10 +86,11 @@ public class Client extends Thread {
         } else {
             SongFile[] newSongs = new SongFile[files.length];
             boolean[] add = new boolean[files.length];
-            for (int i = 0; i < newSongs.length; ++i) {
-                newSongs[i] = new SongFile(files[i]);
-                add[i] = true;
-            }
+            for (int i = 0; i < newSongs.length; ++i)
+                if (files[i].isFile()) {
+                    newSongs[i] = new SongFile(files[i]);
+                    add[i] = true;
+                }
 
             for (int i = 0; i < songs.size(); ) {
                 SongFile song = songs.get(i);
