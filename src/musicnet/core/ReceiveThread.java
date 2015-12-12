@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -64,6 +65,7 @@ public class ReceiveThread extends Thread {
         else if (type == Datatype.Request) {
             Console.log("Received a Request");
             Request request = (Request) Serializer.deserialize(data);
+            client.updatePeers(Collections.singletonList(request.sender));
 
             switch (request.type) {
                 case GetHosts:

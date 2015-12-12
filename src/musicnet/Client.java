@@ -23,7 +23,6 @@ public class Client extends Thread {
     public Map<String, List<DataChunk>> receivedData = new ConcurrentHashMap<>();
     private PeerInfo info;
     private File directory;
-    private File nodesFile;
 
     public Client() {
         peers = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
@@ -32,12 +31,12 @@ public class Client extends Thread {
     }
 
     public boolean isReady() {
-        return peers.size() >= 2;
+        return peers.size() > 0;
     }
 
     public File getDirectory() {
         if (directory == null) {
-            directory = new File("C:\\Users\\Quan\\Desktop\\Data1");
+            directory = new File("C:\\Users\\Quan\\Desktop\\Data2");
         }
         return directory;
     }
@@ -47,10 +46,11 @@ public class Client extends Thread {
     }
 
     public File getNodesFile() {
-        if (nodesFile == null) {
-            nodesFile = new File(getDirectory().getAbsolutePath() + "\\nodes.txt");
-        }
-        return nodesFile;
+        return new File(getDirectory().getAbsolutePath() + "\\nodes.txt");
+    }
+
+    public List<PeerInfo> getPeers() {
+        return new ArrayList<>(peers);
     }
 
     public void loadPeers() {
@@ -139,12 +139,28 @@ public class Client extends Thread {
         new SendThread(this, req, file);
     }
 
-    public void updatePeers(List<PeerInfo> list) {
 
+    public void showFilesList(PeerInfo peer) {
+        files.clear();
+        Request req = new Request(RequestType.GetFilesList, Collections.singletonList(peer));
+        sendRequest(req);
+    }
+
+    public void updatePeers(List<PeerInfo> list) {
+        for (PeerInfo newPeer : list) {
+            if (newPeer.equals(info)) continue;
+            boolean add = true;
+            for (PeerInfo peer : peers)
+                if (peer.equals(newPeer)) {
+                    add = false;
+                    break;
+                }
+            if (add) peers.add(newPeer);
+        }
     }
 
     public void updateFiles(List<SongInfo> list) {
-
+        files.addAll(list);
     }
 
     public void updateResult(List<SearchResult> list) {
@@ -171,7 +187,7 @@ public class Client extends Thread {
     public void sendFile(PeerInfo sender, String[] params) {
         assert params != null && params.length > 1 : "Invalid params";
         String hash = params[0];
-        for (SongFile song: songs)
+        for (SongFile song : songs)
             if (song.getHash().equals(hash)) {
                 Request req = new Request(RequestType.SendFile, Collections.singletonList(sender), hash);
                 sendRequest(req, song.file);
@@ -182,7 +198,7 @@ public class Client extends Thread {
     public void sendFilesList(PeerInfo sender) {
         List<SongFile> all = getAllSharedSong();
         List<SongInfo> list = new ArrayList<>();
-        for (SongFile song: all)
+        for (SongFile song : all)
             list.add(new SongInfo(song));
 
         Request req = new Request(RequestType.SendFilesList, Collections.singletonList(sender));
@@ -218,7 +234,7 @@ public class Client extends Thread {
             @Override
             public void run() {
                 Console.info("Discover request sent to " + Arrays.toString(peers.toArray()));
-                sendRequest(new Request(RequestType.GetHosts, peers));
+                sendRequest(new Request(RequestType.GetHosts, getPeers()));
             }
         }, interval, interval);
     }
@@ -263,7 +279,7 @@ public class Client extends Thread {
 
     private List<SongFile> getAllSharedSong() {
         List<SongFile> list = new ArrayList<>();
-        for (SongFile song: songs)
+        for (SongFile song : songs)
             if (song.getShared())
                 list.add(song);
         return list;
