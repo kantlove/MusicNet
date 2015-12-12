@@ -90,7 +90,15 @@ public class WelcomeController extends BaseController {
     }
 
     public void start(ActionEvent event) throws IOException {
-        getClient().savePeers();
-        getMain().showHomeView();
+        if (getClient().isReady()) {
+            getClient().savePeers();
+            getMain().showHomeView();
+        } else {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("MusicNet can't start");
+            alert.setHeaderText(null);
+            alert.setContentText("Please fill enough initial peers");
+            alert.show();
+        }
     }
 }

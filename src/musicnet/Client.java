@@ -12,11 +12,16 @@ import java.util.Scanner;
 
 public class Client extends Thread {
     public final ObservableList<PeerInfo> peers;
+    private PeerInfo info;
     private File directory;
     private File nodesFile;
 
     public Client() {
         peers = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
+    }
+
+    public boolean isReady() {
+        return peers.size() >= 2;
     }
 
     public File getDirectory() {
@@ -75,6 +80,7 @@ public class Client extends Thread {
     }
 
     private void initialize() {
-
+        info = peers.get(0);
+        peers.remove(0);
     }
 }
