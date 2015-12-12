@@ -1,5 +1,6 @@
 package musicnet.controller;
 
+import musicnet.Client;
 import musicnet.Main;
 
 public class BaseController {
@@ -11,5 +12,9 @@ public class BaseController {
 
     public Main getMain() {
         return main;
+    }
+
+    public Client getClient() {
+        return getMain().getClient();
     }
 }
