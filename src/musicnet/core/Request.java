@@ -1,5 +1,7 @@
 package musicnet.core;
 
+import musicnet.model.PeerInfo;
+
 import java.io.Serializable;
 import java.util.List;
 

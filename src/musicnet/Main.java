@@ -64,7 +64,6 @@ public class Main extends Application {
     public void showHomeView() throws IOException {
         FXMLLoaderEx loader = new FXMLLoaderEx();
         loader.setLocation(getClass().getResource("view/library.fxml"));
-        Node tmp = layoutRoot.getBottom();
         layoutRoot.setCenter(loader.load());
         loader.getController().setMain(this);
     }

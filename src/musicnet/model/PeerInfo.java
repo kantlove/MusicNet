@@ -1,27 +1,43 @@
-package musicnet.core;
+package musicnet.model;
 
 import java.io.Serializable;
-import java.net.UnknownHostException;
 
 /**
  * Created by mt on 12/2/2015.
+ * Edited by quan on 12/12/2015.
  */
 public class PeerInfo implements Serializable {
     public String name;
     public Address address;
 
-    public PeerInfo(String name, Address address) {
-        this.name = name;
-        this.address = address;
+    public PeerInfo(String name, String address) {
+        setName(name);
+        setAddress(address);
     }
 
-    public static PeerInfo fromString(String s) throws UnknownHostException {
+    public static PeerInfo fromString(String s) {
         assert s != null : "Invalid string";
 
         String[] parts = s.split(" ");
         assert parts.length > 2 : "Invalid string";
 
-        return new PeerInfo(parts[0], Address.fromString(parts[1]));
+        return new PeerInfo(parts[0], parts[1]);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAddress() {
+        return address.toString();
+    }
+
+    public void setAddress(String address) {
+        this.address = Address.fromString(address);
     }
 
     @Override
@@ -30,10 +46,8 @@ public class PeerInfo implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
 
         PeerInfo peerInfo = (PeerInfo) o;
-
-        if (name != null ? !name.equals(peerInfo.name) : peerInfo.name != null) return false;
-        return address.equals(peerInfo.address);
-
+        return name != null ? name.equals(peerInfo.name)
+                : peerInfo.name == null && address.equals(peerInfo.address);
     }
 
     @Override
@@ -45,6 +59,6 @@ public class PeerInfo implements Serializable {
 
     @Override
     public String toString() {
-        return name;
+        return name + "@" + getAddress();
     }
 }

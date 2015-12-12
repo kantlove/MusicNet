@@ -1,7 +1,12 @@
 package musicnet.core;
 
+import musicnet.model.PeerInfo;
+
 import java.io.IOException;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -39,20 +44,18 @@ public final class Peer extends Thread {
 
         Files.lines(Paths.get(path)).forEach(s -> {
             PeerInfo info = null;
-            try {
-                if (i.val == 1) {
-                    filesPath = s;
-                } else {
-                    info = PeerInfo.fromString(s);
-                    if (i.val == 0)
-                        this.info = info;
-                    else {
-                        rs.add(info);
-                    }
+
+            if (i.val == 1) {
+                filesPath = s;
+            } else {
+                info = PeerInfo.fromString(s);
+                if (i.val == 0)
+                    this.info = info;
+                else {
+                    rs.add(info);
                 }
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
             }
+
             i.val++;
         });
         return rs;

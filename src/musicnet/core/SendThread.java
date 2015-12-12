@@ -1,5 +1,8 @@
 package musicnet.core;
 
+import musicnet.model.Address;
+import musicnet.model.PeerInfo;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
