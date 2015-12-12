@@ -3,9 +3,7 @@ package musicnet.controller;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import musicnet.Main;
 import musicnet.model.PeerInfo;
@@ -16,7 +14,7 @@ import musicnet.model.SongInfo;
  */
 public class ExplorerController extends BaseController {
     public ListView<PeerInfo> listPeers;
-    public TableView tableFiles;
+    public TableView<SongInfo> tableFiles;
 
     @Override
     public void setMain(Main main) {
@@ -32,6 +30,17 @@ public class ExplorerController extends BaseController {
 
         tableFiles.getColumns().addAll(nameCol);
         tableFiles.setEditable(true);
+
+        ContextMenu menu = new ContextMenu();
+        MenuItem downloadFileItem = new MenuItem("Download");
+        downloadFileItem.setOnAction(event -> {
+            SongInfo item = tableFiles.getSelectionModel().getSelectedItem();
+            if (item != null) {
+                getClient().download(listPeers.getSelectionModel().getSelectedItem(), item);
+            }
+        });
+        menu.getItems().add(downloadFileItem);
+        tableFiles.setContextMenu(menu);
 
         listPeers.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             getClient().showFilesList(newValue);

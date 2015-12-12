@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.AnchorPane?>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="50.0"
+            prefWidth="600.0" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="musicnet.controller.TopBarController">
+    <children>
+        <Button fx:id="buttonDown" layoutX="406.0" layoutY="13.0" mnemonicParsing="false" prefHeight="25.0"
+                prefWidth="85.0" text="Download" onAction="#showDownloadDialog"/>
+        <Button fx:id="buttonUp" layoutX="501.0" layoutY="13.0" mnemonicParsing="false" prefHeight="25.0"
+                prefWidth="85.0" text="Upload" onAction="#showUploadDialog"/>
+    </children>
+</AnchorPane>

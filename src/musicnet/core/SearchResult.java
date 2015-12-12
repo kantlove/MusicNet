@@ -28,4 +28,3 @@ public class SearchResult implements Serializable {
         return super.toString() + String.format(" (%.2f)", score);
     }
 }
-

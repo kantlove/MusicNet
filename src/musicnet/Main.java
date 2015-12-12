@@ -36,6 +36,13 @@ public class Main extends Application {
         loader.getController().setMain(this);
     }
 
+    private void showTopBar() throws IOException {
+        FXMLLoaderEx loader = new FXMLLoaderEx();
+        loader.setLocation(getClass().getResource("view/topbar.fxml"));
+        layoutRoot.setTop(loader.load());
+        loader.getController().setMain(this);
+    }
+
     private Tab loadTab(String name, String resource) throws IOException {
         FXMLLoaderEx loader = new FXMLLoaderEx();
         loader.setLocation(getClass().getResource(resource));
@@ -62,6 +69,7 @@ public class Main extends Application {
         tabPane.getTabs().add(loadTab("Explorer", "view/explorer.fxml"));
         tabPane.getTabs().add(loadTab("Search", "view/search.fxml"));
         layoutRoot.setCenter(tabPane);
+        showTopBar();
     }
 
 //    static Peer peer;
