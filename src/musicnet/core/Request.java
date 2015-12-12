@@ -12,7 +12,7 @@ public class Request implements Serializable {
     public List<PeerInfo> receivers;
     public String[] params;
 
-    public Request(RequestType type, List<PeerInfo> receivers, String...params) {
+    public Request(RequestType type, List<PeerInfo> receivers, String... params) {
         assert receivers.size() > 0 : "At least 1 receiver";
         this.type = type;
         this.receivers = receivers;

@@ -5,7 +5,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by mt on 12/2/2015.
@@ -112,8 +115,7 @@ public class SendThread extends Thread {
             /* Avoid sending too fast by adding a small delay */
             try {
                 Thread.sleep(50);
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
@@ -137,7 +139,7 @@ public class SendThread extends Thread {
         statusTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                if(request.type == RequestType.SendFile)
+                if (request.type == RequestType.SendFile)
                     Console.logf("Uploaded %.1f%% at %.1fkB/s.\n", percent, uploadedAmount / 1024);
                 uploadedAmount = 0;
             }
@@ -149,8 +151,7 @@ public class SendThread extends Thread {
         try {
             startStatusTimer();
             send();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

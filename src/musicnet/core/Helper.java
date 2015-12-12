@@ -12,7 +12,7 @@ public final class Helper {
      * Insert an item to a list at arbitrary index. Override any existing item.
      */
     public static <T> void insert(List<T> list, T item, int index) {
-        while(list.size() <= index) {
+        while (list.size() <= index) {
             list.add(null);
         }
         list.set(index, item);
@@ -53,7 +53,7 @@ public final class Helper {
     public static byte[] mergeChunks(List<DataChunk> chunks) {
         int length = 0;
         for (DataChunk c : chunks) {
-            if(c == null) {
+            if (c == null) {
                 Console.log("Missing part " + chunks.indexOf(c));
                 continue; // packet loss or something, ignore
             }
@@ -62,7 +62,7 @@ public final class Helper {
         byte[] result = new byte[length];
         int pos = 0;
         for (DataChunk c : chunks) {
-            if(c == null)
+            if (c == null)
                 continue;
             for (byte element : c.data) {
                 result[pos] = element;
@@ -72,9 +72,9 @@ public final class Helper {
         return result;
     }
 
-    public static <T>int countNonNull(Collection<T> list) {
+    public static <T> int countNonNull(Collection<T> list) {
         int count = 0;
-        for(T e : list) {
+        for (T e : list) {
             count += (e != null) ? 1 : 0;
         }
         return count;
@@ -102,16 +102,17 @@ public final class Helper {
 
     /**
      * Find a list of songs base on matching between query and song names
-     * @param query query that contains the name of the target song
-     * @param files list of available songs to search
+     *
+     * @param query     query that contains the name of the target song
+     * @param files     list of available songs to search
      * @param threshold songs that has matching result lower than threshold will be discarded
      * @return
      */
     public static List<SearchResult> bulkMatch(String query, List<SongFile> files, double threshold) {
         List<SearchResult> results = new ArrayList<>();
-        for(SongFile f : files) {
+        for (SongFile f : files) {
             double score = DiceCoefficient.percentMatch(query, f.name);
-            if(score >= threshold) {
+            if (score >= threshold) {
                 results.add(new SearchResult(f, score));
             }
         }

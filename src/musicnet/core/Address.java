@@ -31,11 +31,11 @@ public class Address implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj == null || !(obj instanceof Address))
+        if (obj == null || !(obj instanceof Address))
             return false;
-        if(obj == this)
+        if (obj == this)
             return true;
-        Address a = (Address)obj;
+        Address a = (Address) obj;
         return ip.equals(a.ip) && port == a.port;
     }
 

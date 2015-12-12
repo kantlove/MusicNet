@@ -1,17 +1,12 @@
 package musicnet.core;
 
-import javax.xml.crypto.Data;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Stream;
 
 /**
  * Created by mt on 12/2/2015.
@@ -29,10 +24,6 @@ public final class Peer extends Thread {
     public List<SongFile> filesList;
     private String filesPath;
 
-    /**
-     * Init with nodes.txt
-     * @param nodeFile nodes.txt path
-     */
     public Peer(String nodeFile) throws IOException {
         knownHost.addAll(readNodes(nodeFile));
         filesList = Helper.getFilesInDirectory(this.filesPath);
@@ -41,16 +32,17 @@ public final class Peer extends Thread {
 
     private List<PeerInfo> readNodes(String path) throws IOException {
         final List<PeerInfo> rs = new ArrayList<>();
-        class Int {int val = 0;}
+        class Int {
+            int val = 0;
+        }
         Int i = new Int();
 
         Files.lines(Paths.get(path)).forEach(s -> {
             PeerInfo info = null;
             try {
-                if(i.val == 1) {
+                if (i.val == 1) {
                     filesPath = s;
-                }
-                else {
+                } else {
                     info = PeerInfo.fromString(s);
                     if (i.val == 0)
                         this.info = info;
@@ -58,8 +50,7 @@ public final class Peer extends Thread {
                         rs.add(info);
                     }
                 }
-            }
-            catch (UnknownHostException e) {
+            } catch (UnknownHostException e) {
                 e.printStackTrace();
             }
             i.val++;
@@ -86,7 +77,7 @@ public final class Peer extends Thread {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                //Console.info("Discover request sent to " + Arrays.toString(knownHost.toArray()));
+                Console.info("Discover request sent to " + Arrays.toString(knownHost.toArray()));
                 sendRequest(new Request(RequestType.GetHosts, knownHost));
             }
         }, interval, interval);
@@ -111,25 +102,23 @@ public final class Peer extends Thread {
 
                     Object received = Serializer.deserialize(receiveData);
                     new ReceiveThread(this, received);
-                }
-                catch (ClassNotFoundException | IOException e) {
+                } catch (ClassNotFoundException | IOException e) {
                     // ignore because we are looping forever
-                    if(e instanceof SocketTimeoutException) {
+                    if (e instanceof SocketTimeoutException) {
                         startResending();
                     }
                 }
             }
-        }
-        catch (SocketException ex) {
+        } catch (SocketException ex) {
             System.out.printf("UDP Port %d is occupied.\n", this.info.address.port);
             System.exit(1);
         }
     }
 
     private void startResending() {
-        for(Map.Entry<String, ArrayList<DataChunk>> entry : receivedData.entrySet()) {
+        for (Map.Entry<String, ArrayList<DataChunk>> entry : receivedData.entrySet()) {
             List<DataChunk> val = entry.getValue();
-            if(val.size() == 0 || val.get(0) == null || Helper.countNonNull(val) < val.get(0).total) {
+            if (val.size() == 0 || val.get(0) == null || Helper.countNonNull(val) < val.get(0).total) {
                 Console.infof("A file is corrupted. Let the user click retry or resend request automatically?t.\n");
             }
         }

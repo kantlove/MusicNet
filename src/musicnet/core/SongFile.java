@@ -8,12 +8,13 @@ public class SongFile implements Serializable {
     public String hash = "nohash";
     private File file;
 
-    protected SongFile() {}
+    protected SongFile() {
+    }
 
     public SongFile(File file) {
         this.file = file;
         name = file.getName();
-        hash = "" + file.getPath().hashCode();
+        hash = "" + file.getAbsolutePath().hashCode();
     }
 
     public SongFile(SongFile song) {
@@ -50,7 +51,8 @@ public class SongFile implements Serializable {
 class SearchResult extends SongFile {
     double score;
 
-    public SearchResult() {}
+    public SearchResult() {
+    }
 
     public SearchResult(File file) {
         super(file);
