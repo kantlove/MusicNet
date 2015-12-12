@@ -20,6 +20,7 @@ public class Client extends Thread {
     public final ObservableList<PeerInfo> peers;
     public final ObservableList<SongFile> songs;
     public final ObservableList<SongInfo> files;
+    public final ObservableList<SearchResult> results;
     public Map<String, List<DataChunk>> receivedData = new ConcurrentHashMap<>();
     private PeerInfo info;
     private File directory;
@@ -28,6 +29,7 @@ public class Client extends Thread {
         peers = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
         songs = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
         files = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
+        results = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
     }
 
     public boolean isReady() {
@@ -139,7 +141,6 @@ public class Client extends Thread {
         new SendThread(this, req, file);
     }
 
-
     public void showFilesList(PeerInfo peer) {
         files.clear();
         Request req = new Request(RequestType.GetFilesList, Collections.singletonList(peer));
@@ -164,15 +165,26 @@ public class Client extends Thread {
     }
 
     public void updateResult(List<SearchResult> list) {
-
+        for (SearchResult x : list) {
+            boolean add = true;
+            for (SearchResult y : results)
+                if (x.equals(y)) {
+                    add = false;
+                    break;
+                }
+            if (add) results.add(x);
+        }
     }
 
     public void fileReceived(File file) {
 
     }
 
-    public List<SearchResult> search(String query) {
-        return null;
+    public void search(String query) {
+        results.clear();
+        results.addAll(Helper.bulkMatch(query, songs, 0.3));
+        Request req = new Request(RequestType.Search, getPeers(), query);
+        sendRequest(req);
     }
 
     public void sendHosts(PeerInfo sender) {
@@ -246,7 +258,7 @@ public class Client extends Thread {
 
             byte[] receiveData;
             while (true) {
-                ds.setSoTimeout(2000);
+                ds.setSoTimeout(10000);
                 try {
                     receiveData = new byte[Config.RECEIVE_BASKET_SIZE]; // the size must be always > any possible datachunk size
                     DatagramPacket dp = new DatagramPacket(receiveData, receiveData.length);
