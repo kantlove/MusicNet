@@ -9,11 +9,13 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
 public class SongFile {
+    public File file;
     private String name;
     private String hash;
     private BooleanProperty shared;
 
     public SongFile(File file) throws IOException, NoSuchAlgorithmException {
+        this.file = file;
         name = file.getName();
         hash = Helper.getFileCheckSum(file);
         shared = new SimpleBooleanProperty(true);

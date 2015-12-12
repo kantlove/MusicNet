@@ -2,22 +2,16 @@ package musicnet.core;
 
 import musicnet.model.SongFile;
 
-import java.io.File;
+import java.io.Serializable;
 
-/**
- * Created by Quan on 12/12/2015.
- */
-public class SearchResult {
-    double score;
-
-    public SearchResult() {
-    }
-
-    public SearchResult(File file) {
-
-    }
+public class SearchResult implements Serializable {
+    public String name;
+    public String hash;
+    public double score;
 
     public SearchResult(SongFile song, double score) {
+        this.name = song.getName();
+        this.hash = song.getHash();
         this.score = score;
     }
 

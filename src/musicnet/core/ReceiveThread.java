@@ -54,7 +54,7 @@ public class ReceiveThread extends Thread {
                 if (elementType == PeerInfo.class) {
                     client.updatePeers((List<PeerInfo>) list);
                 } else if (elementType == SongInfo.class) {
-                    client.updateInfos((List<SongInfo>) list);
+                    client.updateFiles((List<SongInfo>) list);
                 } else if (elementType == SearchResult.class) {
                     client.updateResult((List<SearchResult>) list);
                 }

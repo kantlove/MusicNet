@@ -108,12 +108,7 @@ public final class Helper {
             }
         }
 
-        Collections.sort(results, new Comparator<SearchResult>() {
-            @Override
-            public int compare(SearchResult o1, SearchResult o2) {
-                return Double.compare(o2.score, o1.score);
-            }
-        });
+        Collections.sort(results, (o1, o2) -> Double.compare(o2.score, o1.score));
         return results;
     }
 
