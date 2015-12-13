@@ -87,6 +87,9 @@ public class TopBarController extends BaseController {
     public void play() {
         File file = getClient().getPlayFile();
         Platform.runLater(() -> labelName.setText(file.getName()));
+        if (player != null) {
+            player.dispose();
+        }
         Media media = new Media(file.toURI().toString());
         player = new MediaPlayer(media);
         player.play();

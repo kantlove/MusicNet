@@ -152,6 +152,21 @@ public class Client extends Thread {
         }
     }
 
+    public void remove(SongFile song) {
+        song.file.delete();
+        updateSongs();
+    }
+
+    public void importFile(File file) {
+        for (SongFile song: songs) {
+            if (song.file.getAbsolutePath().equals(file.getAbsolutePath()))
+                return;
+        }
+        File dest = new File(getDirectory(), file.getName());
+        Helper.copyFile(file, dest);
+        updateSongs();
+    }
+
     public void sendRequest(Request req) {
         req.sender = this.info;
         new SendThread(this, req);
