@@ -157,6 +157,9 @@ public class Client extends Thread {
     }
 
     public void download(PeerInfo peer, SongInfo song) {
+        for (SongFile file : songs)
+            if (file.getHash().equals(song.getHash()))
+                return;
         for (DownloadItem x : downloadItems)
             if (x.song.getHash().equals(song.getHash()))
                 return;
@@ -199,8 +202,12 @@ public class Client extends Thread {
         for (int i = 0; i < downloadItems.size(); ++i) {
             DownloadItem item = downloadItems.get(i);
             if (item.song.getHash().equals(file.getName())) {
-                if (file.renameTo(new File(file.getParentFile(), item.song.getName())))
+                if (file.renameTo(new File(file.getParentFile(), item.song.getName()))) {
                     updateSongs();
+                } else {
+                    if (!file.delete())
+                        file.deleteOnExit();
+                }
                 downloadItems.remove(i);
                 break;
             }

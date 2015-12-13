@@ -1,7 +1,5 @@
 package musicnet.controller;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -9,9 +7,6 @@ import musicnet.Main;
 import musicnet.model.PeerInfo;
 import musicnet.model.SongInfo;
 
-/**
- * Created by Quan on 12/12/2015.
- */
 public class ExplorerController extends BaseController {
     public ListView<PeerInfo> listPeers;
     public TableView<SongInfo> tableFiles;

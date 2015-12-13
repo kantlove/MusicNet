@@ -7,6 +7,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import musicnet.util.FXMLLoaderEx;
 
 import java.io.IOException;
@@ -70,49 +71,10 @@ public class Main extends Application {
         tabPane.getTabs().add(loadTab("Search", "view/search.fxml"));
         layoutRoot.setCenter(tabPane);
         showTopBar();
-    }
 
-//    static Peer peer;
-//    public static void main(String[] args) throws IOException {
-//        // initialize
-//        peer = new Peer("D:\\My Document\\Java projects\\MusicNet\\data\\nodesA.txt");
-//        // setup event handlers
-//        peer.peerDiscovered.subscribe(Main::PeerDiscoveredHandler);
-//        peer.fileReceived.subscribe(Main::FileReceivedHandler);
-//        peer.filesListReceived.subscribe(Main::FilesListReceivedHandler);
-//        peer.searchResultsReceived.subscribe(Main::SearchResultsReceivedHandler);
-//
-//        // a test sending request
-//        if(peer.info.name.equals("A")) {
-//            Timer timer = new Timer();
-//            timer.schedule(new TimerTask() {
-//                @Override
-//                public void run() {
-//                    //peer.sendRequest(new Request(RequestType.GetFile, peer.knownHost, "song.mp3"));
-//                    //peer.sendRequest(new Request(RequestType.GetFilesList, peer.knownHost));
-//                    peer.sendRequest(new Request(RequestType.Search, peer.knownHost, "noo phuc thinh ngay mua tan"));
-//                    peer.sendRequest(new Request(RequestType.Search, peer.knownHost, "two hearst"));
-//                }
-//            }, 10000);
-//        }
-//    }
-//
-//    private static void PeerDiscoveredHandler(Object sender, Object arg) {
-//        List<PeerInfo> newHosts = (List<PeerInfo>)arg;
-//        Console.log("Discover " + Arrays.toString(newHosts.toArray()));
-//    }
-//
-//    private static void FileReceivedHandler(Object sender, Object arg) {
-//        Console.info("File received.");
-//    }
-//
-//    private static void FilesListReceivedHandler(Object sender, Object arg) {
-//        Console.info("Files list received");
-//        Console.info(Arrays.toString(((List<SongFile>)arg).toArray()));
-//    }
-//
-//    private static void SearchResultsReceivedHandler(Object sender, Object arg) {
-//        Console.info("Search results received");
-//        Console.info(Arrays.toString(((List<SearchResult>)arg).toArray()));
-//    }
+        primaryStage.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue)
+                client.updateSongs();
+        });
+    }
 }

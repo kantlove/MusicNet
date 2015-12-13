@@ -1,5 +1,6 @@
 package musicnet.controller;
 
+import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
@@ -21,10 +22,10 @@ public class TopBarController extends BaseController {
     public void setMain(Main main) {
         super.setMain(main);
         getClient().downloadItems.addListener((ListChangeListener<DownloadItem>) c -> {
-            buttonDown.setText("Download (" + getClient().downloadItems.size() + ")");
+            Platform.runLater(() -> buttonDown.setText("Download (" + getClient().downloadItems.size() + ")"));
         });
         getClient().uploadItems.addListener((ListChangeListener<UploadItem>) c -> {
-            buttonDown.setText("Upload (" + getClient().uploadItems.size() + ")");
+            Platform.runLater(() -> buttonDown.setText("Upload (" + getClient().uploadItems.size() + ")"));
         });
     }
 

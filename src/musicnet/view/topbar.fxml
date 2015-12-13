@@ -6,9 +6,9 @@
             prefWidth="600.0" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="musicnet.controller.TopBarController">
     <children>
-        <Button fx:id="buttonDown" layoutX="406.0" layoutY="13.0" mnemonicParsing="false" prefHeight="25.0"
-                prefWidth="85.0" text="Download" onAction="#showDownloadDialog"/>
-        <Button fx:id="buttonUp" layoutX="501.0" layoutY="13.0" mnemonicParsing="false" prefHeight="25.0"
-                prefWidth="85.0" text="Upload" onAction="#showUploadDialog"/>
+        <Button fx:id="buttonDown" layoutX="350.0" layoutY="13.0" mnemonicParsing="false" prefHeight="25.0"
+                prefWidth="100.0" text="Download (0)" onAction="#showDownloadDialog"/>
+        <Button fx:id="buttonUp" layoutX="475.0" layoutY="13.0" mnemonicParsing="false" prefHeight="25.0"
+                prefWidth="100.0" text="Upload (0)" onAction="#showUploadDialog"/>
     </children>
 </AnchorPane>
