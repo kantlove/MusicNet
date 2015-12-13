@@ -2,6 +2,7 @@ package musicnet;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import musicnet.controller.TopBarController;
 import musicnet.core.*;
 import musicnet.core.Console;
 import musicnet.model.*;
@@ -23,7 +24,9 @@ public class Client extends Thread {
     public final ObservableList<UploadItem> uploadItems;
     public Map<String, List<DataChunk>> receivedData = new ConcurrentHashMap<>();
     private PeerInfo info;
+    private TopBarController topBar;
     private File directory;
+    private File playFile;
 
     public Client() {
         peers = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
@@ -51,6 +54,27 @@ public class Client extends Thread {
 
     public File getNodesFile() {
         return new File(getDirectory().getAbsolutePath() + "\\nodes.txt");
+    }
+
+    public void setTopBar(TopBarController topBar) {
+        this.topBar = topBar;
+    }
+
+    public File getPlayFile() {
+        if (playFile == null) {
+            if (songs.size() > 0)
+                playFile = songs.get(0).file;
+        }
+        return playFile;
+    }
+
+    public void setPlayFile(File file) {
+        playFile = file;
+    }
+
+    public void play() {
+        if (topBar != null)
+            topBar.play();
     }
 
     public List<PeerInfo> getPeers() {

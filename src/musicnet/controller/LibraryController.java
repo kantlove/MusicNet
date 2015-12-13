@@ -1,6 +1,8 @@
 package musicnet.controller;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.CheckBoxTableCell;
@@ -9,7 +11,7 @@ import musicnet.Main;
 import musicnet.model.SongFile;
 
 public class LibraryController extends BaseController {
-    public TableView tableSongs;
+    public TableView<SongFile> tableSongs;
 
     @Override
     public void setMain(Main main) {
@@ -28,5 +30,17 @@ public class LibraryController extends BaseController {
 
         tableSongs.getColumns().addAll(sharedCol, nameCol);
         tableSongs.setEditable(true);
+
+        ContextMenu menu = new ContextMenu();
+        MenuItem playItem = new MenuItem("Play");
+        playItem.setOnAction(event -> {
+            SongFile item = tableSongs.getSelectionModel().getSelectedItem();
+            if (item != null) {
+                getClient().setPlayFile(item.file);
+                getClient().play();
+            }
+        });
+        menu.getItems().add(playItem);
+        tableSongs.setContextMenu(menu);
     }
 }
