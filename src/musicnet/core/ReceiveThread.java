@@ -2,6 +2,7 @@ package musicnet.core;
 
 import musicnet.Client;
 import musicnet.model.PeerInfo;
+import musicnet.model.SearchResult;
 import musicnet.model.SongInfo;
 
 import java.io.File;

@@ -7,7 +7,6 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 import musicnet.util.FXMLLoaderEx;
 
 import java.io.IOException;
@@ -28,6 +27,8 @@ public class Main extends Application {
         loader.getController().setMain(this);
         primaryStage.setScene(new Scene(layoutRoot));
         primaryStage.show();
+
+        primaryStage.setOnCloseRequest(event -> System.exit(0));
     }
 
     private void showWelcomeView() throws IOException {

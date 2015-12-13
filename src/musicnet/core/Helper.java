@@ -1,5 +1,6 @@
 package musicnet.core;
 
+import musicnet.model.SearchResult;
 import musicnet.model.SongFile;
 
 import java.io.File;
@@ -108,7 +109,7 @@ public final class Helper {
         List<SearchResult> results = new ArrayList<>();
         for (SongFile f : files) {
             double score = DiceCoefficient.percentMatch(query, f.getName());
-            if (score >= threshold) {
+            if (score >= threshold || f.getName().toLowerCase().contains(query.toLowerCase().trim())) {
                 results.add(new SearchResult(f, score));
             }
         }

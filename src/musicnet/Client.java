@@ -158,7 +158,7 @@ public class Client extends Thread {
     }
 
     public void importFile(File file) {
-        for (SongFile song: songs) {
+        for (SongFile song : songs) {
             if (song.file.getAbsolutePath().equals(file.getAbsolutePath()))
                 return;
         }
@@ -190,7 +190,10 @@ public class Client extends Thread {
 
     public void search(String query) {
         results.clear();
-        results.addAll(Helper.bulkMatch(query, songs, 0.3));
+        List<SearchResult> queryResults = Helper.bulkMatch(query, songs, 0.3);
+        for (SearchResult item : queryResults)
+            item.peer = info;
+        results.addAll(queryResults);
         Request req = new Request(RequestType.Search, getPeers(), query);
         sendRequest(req);
     }
@@ -218,6 +221,17 @@ public class Client extends Thread {
                     break;
                 }
             if (add) peers.add(newPeer);
+        }
+
+        File file = getNodesFile();
+        try {
+            PrintWriter writer = new PrintWriter(file);
+            writer.println(info.getName() + " " + info.getAddress());
+            for (PeerInfo peer : peers)
+                writer.println(peer.getName() + " " + peer.getAddress());
+            writer.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
     }
 
@@ -298,6 +312,8 @@ public class Client extends Thread {
         assert params != null && params.length > 0 : "Invalid search parameters";
         String query = params[0];
         List<SearchResult> results = Helper.bulkMatch(query, getAllSharedSong(), 0.3);
+        for (SearchResult item : results)
+            item.peer = info;
 
         Request req = new Request(RequestType.SearchResult, Collections.singletonList(peer));
         sendRequest(req, results);

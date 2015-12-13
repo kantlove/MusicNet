@@ -2,19 +2,18 @@ package musicnet.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import musicnet.Main;
-import musicnet.core.SearchResult;
+import musicnet.model.SearchResult;
+import musicnet.model.SongInfo;
 
 /**
  * Created by Quan on 12/12/2015.
  */
 public class SearchController extends BaseController {
     public TextField fieldQuery;
-    public TableView tableResult;
+    public TableView<SearchResult> tableResult;
 
     @Override
     public void setMain(Main main) {
@@ -27,8 +26,22 @@ public class SearchController extends BaseController {
         TableColumn nameCol = new TableColumn("Name");
         nameCol.setCellValueFactory(new PropertyValueFactory<SearchResult, String>("name"));
 
-        tableResult.getColumns().addAll(nameCol);
+        TableColumn fromCol = new TableColumn("From");
+        fromCol.setCellValueFactory(new PropertyValueFactory<SearchResult, String>("from"));
+
+        tableResult.getColumns().addAll(nameCol, fromCol);
         tableResult.setEditable(true);
+
+        ContextMenu menu = new ContextMenu();
+        MenuItem downloadFileItem = new MenuItem("Download");
+        downloadFileItem.setOnAction(event -> {
+            SearchResult result = tableResult.getSelectionModel().getSelectedItem();
+            if (result != null) {
+                getClient().download(result.peer, result.info);
+            }
+        });
+        menu.getItems().add(downloadFileItem);
+        tableResult.setContextMenu(menu);
     }
 
     public void search(ActionEvent event) {
