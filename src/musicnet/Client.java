@@ -253,6 +253,16 @@ public class Client extends Thread {
         }
     }
 
+    public void fileSent(File file) {
+        for (int i = 0; i < uploadItems.size(); ++i) {
+            UploadItem item = uploadItems.get(i);
+            if (item.getName().equals(file.getName())) {
+                uploadItems.remove(i);
+                break;
+            }
+        }
+    }
+
     public void sendHosts(PeerInfo peer) {
         List<PeerInfo> list = new ArrayList<>();
         list.add(info);

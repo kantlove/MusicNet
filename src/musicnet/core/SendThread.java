@@ -141,8 +141,10 @@ public class SendThread extends Thread {
 
             ds.send(dp);
         }
-        if (request.type == RequestType.SendFile)
+        if (request.type == RequestType.SendFile) {
             Console.info("Complete sending file.");
+            client.fileSent(file);
+        }
         statusTimer.cancel();
     }
 

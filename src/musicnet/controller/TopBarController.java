@@ -32,12 +32,10 @@ public class TopBarController extends BaseController {
     public void setMain(Main main) {
         super.setMain(main);
         getClient().setTopBar(this);
-        getClient().downloadItems.addListener((ListChangeListener<DownloadItem>) c -> {
-            Platform.runLater(() -> buttonDown.setText("Download (" + getClient().downloadItems.size() + ")"));
-        });
-        getClient().uploadItems.addListener((ListChangeListener<UploadItem>) c -> {
-            Platform.runLater(() -> buttonDown.setText("Upload (" + getClient().uploadItems.size() + ")"));
-        });
+        getClient().downloadItems.addListener((ListChangeListener<DownloadItem>) c
+                -> Platform.runLater(() -> buttonDown.setText("Download (" + getClient().downloadItems.size() + ")")));
+        getClient().uploadItems.addListener((ListChangeListener<UploadItem>) c
+                -> Platform.runLater(() -> buttonUp.setText("Upload (" + getClient().uploadItems.size() + ")")));
     }
 
     public void showDownloadDialog(ActionEvent event) throws IOException {
