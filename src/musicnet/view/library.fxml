@@ -5,8 +5,8 @@
 <?import javafx.scene.layout.BorderPane?>
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0"
             prefWidth="600.0" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="musicnet.controller.DownloadController">
+            fx:controller="musicnet.controller.LibraryController">
     <center>
-        <TableView fx:id="tableDownload" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER"/>
+        <TableView fx:id="tableSongs" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER"/>
     </center>
 </BorderPane>
